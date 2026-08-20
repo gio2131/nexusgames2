@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Block Breaker</title>
+<style>
+  html, body { margin: 0; height: 100%; background: #101114; overflow: hidden; }
+  canvas { display: block; width: 100%; height: 100%; }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+/* A small sample game so the player page works out of the box.
+   Fixed 800x450 logical space, scaled to whatever the frame is. */
+(function () {
+  "use strict";
+
+  var W = 800, H = 450;
+  var canvas = document.getElementById("c");
+  var ctx = canvas.getContext("2d");
+  var scale = 1, offX = 0, offY = 0;
+
+  function resize() {
+    var dpr = window.devicePixelRatio || 1;
+    canvas.width = Math.floor(innerWidth * dpr);
+    canvas.height = Math.floor(innerHeight * dpr);
+    scale = Math.min(canvas.width / W, canvas.height / H);
+    offX = (canvas.width - W * scale) / 2;
+    offY = (canvas.height - H * scale) / 2;
+  }
+  addEventListener("resize", resize);
+  resize();
+
+  var COLS = 10, ROWS = 5, PAD = 8;
+  var BW = (W - PAD * (COLS + 1)) / COLS, BH = 20;
+  var COLORS = ["#6ea8fe", "#7fd1ae", "#f2c26b", "#e8896f", "#b79ce0"];
+
+  var paddle, ball, bricks, score, lives, state;
+
+  function reset(full) {
+    paddle = { x: W / 2 - 55, y: H - 34, w: 110, h: 12, speed: 9, left: false, right: false };
+    ball = { x: W / 2, y: H - 60, r: 7, vx: 4.2, vy: -4.6, stuck: true };
+    if (full) {
+      score = 0;
+      lives = 3;
+      bricks = [];
+      for (var r = 0; r < ROWS; r++) {
+        for (var c = 0; c < COLS; c++) {
+          bricks.push({
+            x: PAD + c * (BW + PAD),
+            y: 60 + r * (BH + PAD),
+            w: BW, h: BH, alive: true, color: COLORS[r % COLORS.length]
+          });
+        }
+      }
+      state = "ready";
+    }
+  }
+  reset(true);
+
+  function toLogical(clientX) {
+    return (clientX * (window.devicePixelRatio || 1) - offX) / scale;
+  }
+
+  addEventListener("mousemove", function (e) {
+    paddle.x = toLogical(e.clientX) - paddle.w / 2;
+  });
+  addEventListener("touchmove", function (e) {
+    paddle.x = toLogical(e.touches[0].clientX) - paddle.w / 2;
+    e.preventDefault();
+  }, { passive: false });
+
+  addEventListener("keydown", function (e) {
+    if (e.key === "ArrowLeft") paddle.left = true;
+    if (e.key === "ArrowRight") paddle.right = true;
+    if (e.key === " " || e.key === "Enter") launch();
+  });
+  addEventListener("keyup", function (e) {
+    if (e.key === "ArrowLeft") paddle.left = false;
+    if (e.key === "ArrowRight") paddle.right = false;
+  });
+  addEventListener("mousedown", launch);
+  addEventListener("touchstart", launch);
+
+  function launch() {
+    if (state === "over" || state === "won") { reset(true); return; }
+    ball.stuck = false;
+    state = "playing";
+  }
+
+  function step() {
+    if (paddle.left) paddle.x -= paddle.speed;
+    if (paddle.right) paddle.x += paddle.speed;
+    paddle.x = Math.max(0, Math.min(W - paddle.w, paddle.x));
+
+    if (ball.stuck) {
+      ball.x = paddle.x + paddle.w / 2;
+      ball.y = paddle.y - ball.r - 2;
+      return;
+    }
+
+    ball.x += ball.vx;
+    ball.y += ball.vy;
+
+    if (ball.x < ball.r) { ball.x = ball.r; ball.vx *= -1; }
+    if (ball.x > W - ball.r) { ball.x = W - ball.r; ball.vx *= -1; }
+    if (ball.y < ball.r) { ball.y = ball.r; ball.vy *= -1; }
+
+    // paddle bounce: contact point steers the angle
+    if (ball.vy > 0 && ball.y + ball.r >= paddle.y &&
+        ball.y - ball.r <= paddle.y + paddle.h &&
+        ball.x >= paddle.x && ball.x <= paddle.x + paddle.w) {
+      var hit = (ball.x - (paddle.x + paddle.w / 2)) / (paddle.w / 2);
+      var speed = Math.min(9, Math.hypot(ball.vx, ball.vy) + 0.06);
+      var angle = hit * 1.05;
+      ball.vx = Math.sin(angle) * speed;
+      ball.vy = -Math.cos(angle) * speed;
+      ball.y = paddle.y - ball.r - 1;
+    }
+
+    for (var i = 0; i < bricks.length; i++) {
+      var b = bricks[i];
+      if (!b.alive) continue;
+      if (ball.x > b.x - ball.r && ball.x < b.x + b.w + ball.r &&
+          ball.y > b.y - ball.r && ball.y < b.y + b.h + ball.r) {
+        b.alive = false;
+        score += 10;
+        // bounce off the shallower axis of overlap
+        var ox = Math.min(ball.x - b.x, b.x + b.w - ball.x);
+        var oy = Math.min(ball.y - b.y, b.y + b.h - ball.y);
+        if (ox < oy) ball.vx *= -1; else ball.vy *= -1;
+        break;
+      }
+    }
+
+    if (!bricks.some(function (b) { return b.alive; })) state = "won";
+
+    if (ball.y - ball.r > H) {
+      lives--;
+      if (lives <= 0) state = "over";
+      else { reset(false); state = "ready"; }
+    }
+  }
+
+  function text(str, y, size, color) {
+    ctx.fillStyle = color;
+    ctx.font = "600 " + size + "px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(str, W / 2, y);
+  }
+
+  function draw() {
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.fillStyle = "#101114";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx.setTransform(scale, 0, 0, scale, offX, offY);
+
+    ctx.fillStyle = "#16181c";
+    ctx.fillRect(0, 0, W, H);
+
+    bricks.forEach(function (b) {
+      if (!b.alive) return;
+      ctx.fillStyle = b.color;
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+    });
+
+    ctx.fillStyle = "#e9e9ec";
+    ctx.fillRect(paddle.x, paddle.y, paddle.w, paddle.h);
+
+    ctx.beginPath();
+    ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.font = "500 15px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif";
+    ctx.fillStyle = "#9096a0";
+    ctx.textAlign = "left";
+    ctx.fillText("Score " + score, 12, 30);
+    ctx.textAlign = "right";
+    ctx.fillText("Lives " + lives, W - 12, 30);
+
+    if (state === "ready") text("Click or press space to launch", H / 2, 20, "#9096a0");
+    if (state === "over") { text("Game over", H / 2 - 12, 28, "#e9e9ec"); text("Click to play again", H / 2 + 18, 17, "#9096a0"); }
+    if (state === "won") { text("Cleared", H / 2 - 12, 28, "#e9e9ec"); text("Click to play again", H / 2 + 18, 17, "#9096a0"); }
+  }
+
+  (function loop() {
+    if (state === "playing" || state === "ready") step();
+    draw();
+    requestAnimationFrame(loop);
+  })();
+})();
+</script>
+</body>
+</html>
