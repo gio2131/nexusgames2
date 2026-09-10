@@ -21,54 +21,49 @@
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h8a5 5 0 0 1 4.8 3.6l1.1 3.9a3 3 0 0 1-5.1 2.9L15.4 17H8.6l-1.4 1.4a3 3 0 0 1-5.1-2.9l1.1-3.9A5 5 0 0 1 8 8Z"/><path d="M7 12v3M5.5 13.5h3M16.5 12.5h.01M19 15h.01"/></svg>
         <span>Games</span>
       </a>
-      <a href="about.html" data-page="about.html" aria-label="About">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>
-        <span>About</span>
-      </a>
     </nav>
-    <span class="rail-status" title="Library status"><i></i> 0</span>
+    <span class="rail-status" title="Users online"><i></i> <b data-online-count>—</b></span>
   </aside>
 
   <div class="page-shell">
     <header class="topbar">
       <a class="wordmark" href="index.html"><span>N</span> NEXUS GAMES</a>
-      <p><i></i> Library ready</p>
+      <p><i></i> Catalog ready</p>
     </header>
 
     <main class="home-main">
-      <section class="feature" aria-labelledby="feature-title">
+      <section class="continue-section" aria-labelledby="continue-title">
+        <div class="simple-heading">
+          <h1 id="continue-title">Continue playing</h1>
+          <span id="spotlight-count">0 games</span>
+        </div>
+        <div class="feature" id="spotlight">
         <div class="feature-grid" aria-hidden="true"></div>
         <div class="orb orb-one" aria-hidden="true"></div>
         <div class="orb orb-two" aria-hidden="true"></div>
         <div class="feature-copy">
-          <span class="eyebrow">Fresh start</span>
           <h1 id="feature-title">New worlds<br>loading.</h1>
-          <p>The library is cleared and ready for its next lineup.</p>
-          <a class="button" href="games.html">View library <span aria-hidden="true">↗</span></a>
+          <p>The catalog is cleared and ready for its next lineup.</p>
+          <a class="button" href="games.html">View catalog <span aria-hidden="true">↗</span></a>
         </div>
-        <div class="feature-index" aria-hidden="true">00</div>
+        </div>
+        <div id="featured-row" class="featured-row" aria-live="polite"></div>
       </section>
 
-      <section class="library-section" aria-labelledby="library-title">
+      <section class="library-section" aria-labelledby="catalog-title">
         <div class="section-title">
-          <div>
-            <span class="eyebrow">The collection</span>
-            <h2 id="library-title">Library</h2>
-          </div>
+          <h2 id="catalog-title">Catalog</h2>
           <span class="game-count"><b id="total">0</b> games</span>
         </div>
         <div id="featured" class="game-grid" aria-live="polite"></div>
       </section>
     </main>
 
-    <footer class="site-footer">
-      <span>© <span id="year"></span> Nexus Games</span>
-      <span>Built for instant play.</span>
-    </footer>
   </div>
 
   <script src="assets/js/games-data.js"></script>
   <script src="assets/js/site.js"></script>
+  <script src="assets/js/presence.js"></script>
   <script src="assets/js/home.js"></script>
 </body>
 </html>

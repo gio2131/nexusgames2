@@ -28,8 +28,8 @@
       target.className = "empty";
       target.innerHTML =
         '<div><span class="empty-icon" aria-hidden="true">+</span>' +
-        "<h3>No games in the library</h3>" +
-        "<p>The collection is cleared and ready for what comes next.</p></div>";
+        "<h3>No games in the catalog</h3>" +
+        "<p>The catalog is cleared and ready for what comes next.</p></div>";
       return;
     }
 
@@ -51,12 +51,9 @@
     document.querySelectorAll("[data-page]").forEach(function (link) {
       if (link.getAttribute("data-page") === current) link.setAttribute("aria-current", "page");
     });
-    document.querySelectorAll("#year").forEach(function (year) {
-      year.textContent = String(new Date().getFullYear());
-    });
   }
 
-  window.Site = { esc: esc, renderGrid: renderGrid, findGame: findGame };
+  window.Site = { esc: esc, gameCard: gameCard, renderGrid: renderGrid, findGame: findGame };
 
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initializeChrome);

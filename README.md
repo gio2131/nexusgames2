@@ -1,13 +1,12 @@
 # Nexus Games
 
-A clean, dark static front end for a curated browser-game library. The repository currently ships with an empty catalogue, ready for a new lineup.
+A clean, dark static front end for a curated browser-game catalog. The repository currently ships with an empty catalog, ready for a new lineup.
 
 ## Structure
 
-- `index.html` — editorial home screen
-- `games.html` — searchable game library
+- `index.html` — continue-playing and featured-game screen
+- `games.html` — searchable game catalog
 - `play.html` — in-browser game player
-- `about.html` — project overview
 - `assets/css/style.css` — the complete visual system
 - `assets/js/games-data.js` — the game catalogue
 - `games/` — one folder per future game
@@ -23,11 +22,12 @@ A clean, dark static front end for a curated browser-game library. The repositor
   title: "Your Game",
   category: "Puzzle",
   url: "games/your-slug/index.html",
-  thumb: "assets/img/your-slug.jpg"
+  thumb: "assets/img/your-slug.jpg",
+  featured: true
 }
 ```
 
-The thumbnail is optional. The home page, filters, game count and player update automatically.
+The thumbnail and `featured` flag are optional. The home page, filters, game count and player update automatically.
 
 ## Preview
 
