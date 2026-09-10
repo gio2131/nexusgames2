@@ -1,75 +1,75 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Arcade</title>
-<meta name="description" content="A small, fast collection of browser games. No installs, no accounts.">
-<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="assets/css/style.css">
-<script>
-  // Set the theme before first paint so there is no flash.
-  (function () {
-    try {
-      var t = localStorage.getItem("theme");
-      if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
-    } catch (e) {}
-  })();
-</script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070707">
+  <meta name="description" content="Nexus Games — a curated collection of games that launch instantly.">
+  <title>Nexus Games</title>
+  <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/css/style.css">
 </head>
 <body>
-
-<header class="site-header">
-  <div class="wrap">
-    <a class="brand" href="index.html"><span class="mark">A</span>Arcade</a>
-
-    <nav class="nav" id="nav" aria-label="Main">
-      <a href="index.html">Home</a>
-      <a href="games.html">Games</a>
-      <a href="about.html">About</a>
+  <aside class="rail" aria-label="Primary navigation">
+    <a class="rail-mark" href="index.html" aria-label="Nexus Games home">N</a>
+    <nav class="rail-nav">
+      <a href="index.html" data-page="index.html" aria-label="Home">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5v8a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>
+        <span>Home</span>
+      </a>
+      <a href="games.html" data-page="games.html" aria-label="Games">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 8h8a5 5 0 0 1 4.8 3.6l1.1 3.9a3 3 0 0 1-5.1 2.9L15.4 17H8.6l-1.4 1.4a3 3 0 0 1-5.1-2.9l1.1-3.9A5 5 0 0 1 8 8Z"/><path d="M7 12v3M5.5 13.5h3M16.5 12.5h.01M19 15h.01"/></svg>
+        <span>Games</span>
+      </a>
+      <a href="about.html" data-page="about.html" aria-label="About">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v6M12 7.5h.01"/></svg>
+        <span>About</span>
+      </a>
     </nav>
+    <span class="rail-status" title="Library status"><i></i> 0</span>
+  </aside>
 
-    <button class="icon-btn theme-toggle" type="button" aria-label="Toggle theme">
-      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
-      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
-    </button>
+  <div class="page-shell">
+    <header class="topbar">
+      <a class="wordmark" href="index.html"><span>N</span> NEXUS GAMES</a>
+      <p><i></i> Library ready</p>
+    </header>
 
-    <button class="icon-btn menu-btn" type="button" aria-label="Menu" aria-expanded="false" aria-controls="nav">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-    </button>
+    <main class="home-main">
+      <section class="feature" aria-labelledby="feature-title">
+        <div class="feature-grid" aria-hidden="true"></div>
+        <div class="orb orb-one" aria-hidden="true"></div>
+        <div class="orb orb-two" aria-hidden="true"></div>
+        <div class="feature-copy">
+          <span class="eyebrow">Fresh start</span>
+          <h1 id="feature-title">New worlds<br>loading.</h1>
+          <p>The library is cleared and ready for its next lineup.</p>
+          <a class="button" href="games.html">View library <span aria-hidden="true">↗</span></a>
+        </div>
+        <div class="feature-index" aria-hidden="true">00</div>
+      </section>
+
+      <section class="library-section" aria-labelledby="library-title">
+        <div class="section-title">
+          <div>
+            <span class="eyebrow">The collection</span>
+            <h2 id="library-title">Library</h2>
+          </div>
+          <span class="game-count"><b id="total">0</b> games</span>
+        </div>
+        <div id="featured" class="game-grid" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <span>© <span id="year"></span> Nexus Games</span>
+      <span>Built for instant play.</span>
+    </footer>
   </div>
-</header>
 
-<section class="hero">
-  <div class="wrap">
-    <h1>Games that just open and run.</h1>
-    <p>A small library of browser games. Nothing to install, no account, no launcher &mdash; pick one and play.</p>
-    <div class="btn-row">
-      <a class="btn" href="games.html">Browse games</a>
-      <a class="btn secondary" href="about.html">How it works</a>
-    </div>
-  </div>
-</section>
-
-<main>
-  <div class="wrap">
-    <div class="section-head">
-      <h2>Popular right now</h2>
-      <a href="games.html">All <span id="total">0</span> games &rarr;</a>
-    </div>
-    <div id="featured" class="grid"></div>
-  </div>
-</main>
-
-<footer class="site-footer">
-  <div class="wrap">
-    <span>Arcade</span>
-    <span><a href="games.html">Games</a> &middot; <a href="about.html">About</a></span>
-  </div>
-</footer>
-
-<script src="assets/js/games-data.js"></script>
-<script src="assets/js/site.js"></script>
-<script src="assets/js/home.js"></script>
+  <script src="assets/js/games-data.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="assets/js/home.js"></script>
 </body>
 </html>
+

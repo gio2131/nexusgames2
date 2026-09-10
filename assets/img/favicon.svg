@@ -1,6 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
-  <rect width="32" height="32" rx="8" fill="#2563eb"/>
-  <text x="16" y="22.5" text-anchor="middle" fill="#ffffff"
-        font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif"
-        font-size="19" font-weight="700">A</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect width="64" height="64" rx="17" fill="#d8ff3e"/>
+  <path d="M18 46V18h7l14 17V18h7v28h-7L25 29v17z" fill="#090909"/>
 </svg>
+

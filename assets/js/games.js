@@ -1,52 +1,26 @@
-/* Games page: search box + category chips over the GAMES list. */
-
 (function () {
   "use strict";
 
-  var grid, input, chips, count;
   var query = "";
   var category = "All";
+  var grid, input, chips, count;
 
   function categories() {
-    var seen = [];
-    GAMES.forEach(function (g) {
-      var c = g.category || "Game";
-      if (seen.indexOf(c) === -1) seen.push(c);
+    return ["All"].concat(GAMES.reduce(function (list, game) {
+      var name = game.category || "Game";
+      if (list.indexOf(name) === -1) list.push(name);
+      return list;
+    }, []).sort());
+  }
+
+  function render() {
+    var games = GAMES.filter(function (game) {
+      var matchesCategory = category === "All" || (game.category || "Game") === category;
+      var matchesQuery = !query || game.title.toLowerCase().indexOf(query) !== -1;
+      return matchesCategory && matchesQuery;
     });
-    seen.sort();
-    return ["All"].concat(seen);
-  }
-
-  function matches(game) {
-    var inCat = category === "All" || (game.category || "Game") === category;
-    var inQuery = !query || game.title.toLowerCase().indexOf(query) !== -1;
-    return inCat && inQuery;
-  }
-
-  function apply() {
-    var list = GAMES.filter(matches);
-    Site.renderGrid(grid, list);
-    count.textContent =
-      list.length + (list.length === 1 ? " game" : " games") +
-      (category === "All" ? "" : " in " + category);
-  }
-
-  function buildChips() {
-    categories().forEach(function (name) {
-      var b = document.createElement("button");
-      b.type = "button";
-      b.className = "chip";
-      b.textContent = name;
-      b.setAttribute("aria-pressed", String(name === category));
-      b.addEventListener("click", function () {
-        category = name;
-        chips.querySelectorAll(".chip").forEach(function (c) {
-          c.setAttribute("aria-pressed", String(c === b));
-        });
-        apply();
-      });
-      chips.appendChild(b);
-    });
+    Site.renderGrid(grid, games);
+    count.textContent = games.length + (games.length === 1 ? " game" : " games");
   }
 
   function init() {
@@ -56,27 +30,42 @@
     count = document.getElementById("count");
     if (!grid) return;
 
-    buildChips();
+    if (GAMES.length) {
+      categories().forEach(function (name) {
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "chip";
+        button.textContent = name;
+        button.setAttribute("aria-pressed", String(name === category));
+        button.addEventListener("click", function () {
+          category = name;
+          chips.querySelectorAll(".chip").forEach(function (chip) {
+            chip.setAttribute("aria-pressed", String(chip === button));
+          });
+          render();
+        });
+        chips.appendChild(button);
+      });
+    }
 
     input.addEventListener("input", function () {
       query = input.value.trim().toLowerCase();
-      apply();
+      render();
     });
 
-    // "/" focuses the search box, Escape clears it
-    document.addEventListener("keydown", function (e) {
-      if (e.key === "/" && document.activeElement !== input) {
-        e.preventDefault();
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "/" && document.activeElement !== input) {
+        event.preventDefault();
         input.focus();
-      } else if (e.key === "Escape" && document.activeElement === input) {
+      } else if (event.key === "Escape" && document.activeElement === input) {
         input.value = "";
         query = "";
-        apply();
         input.blur();
+        render();
       }
     });
 
-    apply();
+    render();
   }
 
   if (document.readyState === "loading") {
@@ -85,3 +74,4 @@
     init();
   }
 })();
+

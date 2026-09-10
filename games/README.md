@@ -1,14 +1,6 @@
-# games/
+# Games
 
-One folder per game, each with an `index.html` at its root:
+The Nexus library is currently empty.
 
-```
-games/
-  demo/index.html          <- sample game, playable now
-  2048/index.html
-  snake/index.html
-```
+Add each future game in its own folder with an `index.html` entry point, then register it in `assets/js/games-data.js`.
 
-The folder name is the `id` you put in `assets/js/games-data.js`. Nothing here
-is scanned automatically — a folder only shows up on the site once it has an
-entry in that file.
