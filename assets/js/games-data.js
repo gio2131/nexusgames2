@@ -5,6 +5,15 @@
 */
 const GAMES = [
   {
+    id: "openfront",
+    title: "OpenFront",
+    category: "Strategy",
+    url: "https://openfront.io",
+    thumb: "assets/img/openfront.png",
+    external: true,
+    featured: false
+  },
+  {
     id: "angry-neighbor",
     title: "Angry Neighbor Recode",
     category: "Horror",

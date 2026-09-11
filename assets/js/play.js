@@ -27,6 +27,18 @@
     document.getElementById("game-cat").textContent = game.category || "Game";
     try { localStorage.setItem("nexus:lastPlayed", game.id); } catch (error) {}
 
+    if (game.external) {
+      document.getElementById("fullscreen").hidden = true;
+      stage.classList.add("external-stage");
+      stage.innerHTML =
+        '<div class="external-game">' +
+        '<img src="' + Site.esc(game.thumb) + '" alt="">' +
+        "<p>This game opens on its own game server.</p>" +
+        '<a class="button" href="' + Site.esc(game.url) + '" target="_blank" rel="noopener">Launch game <span aria-hidden="true">↗</span></a>' +
+        "</div>";
+      return;
+    }
+
     var frame = document.createElement("iframe");
     frame.src = game.url;
     frame.title = game.title;

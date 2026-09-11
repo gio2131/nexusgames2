@@ -10,7 +10,14 @@
   function gameCard(game) {
     var link = document.createElement("a");
     link.className = "card";
-    link.href = "play.html?id=" + encodeURIComponent(game.id);
+    link.href = game.external ? game.url : "play.html?id=" + encodeURIComponent(game.id);
+    if (game.external) {
+      link.target = "_blank";
+      link.rel = "noopener";
+    }
+    link.addEventListener("click", function () {
+      try { localStorage.setItem("nexus:lastPlayed", game.id); } catch (error) {}
+    });
     var art = game.thumb
       ? '<img src="' + esc(game.thumb) + '" alt="" loading="lazy">'
       : '<span class="letter">' + esc(game.title.charAt(0).toUpperCase()) + "</span>";
