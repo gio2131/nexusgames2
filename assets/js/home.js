@@ -31,7 +31,6 @@
 
   function init() {
     var catalog = document.getElementById("featured");
-    var row = document.getElementById("featured-row");
     var total = document.getElementById("total");
     var count = document.getElementById("spotlight-count");
     var featured = featuredGames();
@@ -48,7 +47,6 @@
 
     if (spotlightGames.length) {
       setSpotlight(recent || spotlightGames[0], Boolean(recent));
-      spotlightGames.forEach(function (game) { row.appendChild(Site.gameCard(game)); });
     }
   }
 

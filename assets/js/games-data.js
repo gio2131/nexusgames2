@@ -14,6 +14,22 @@ const GAMES = [
     featured: false
   },
   {
+    id: "ultrakill",
+    title: "Ultrakill",
+    category: "Shooter",
+    url: "games/ultrakill/index.html",
+    thumb: "assets/img/ultrakill.jpg",
+    featured: false
+  },
+  {
+    id: "minecraft",
+    title: "Minecraft",
+    category: "Sandbox",
+    url: "games/minecraft/index.html",
+    thumb: "assets/img/minecraft.webp",
+    featured: false
+  },
+  {
     id: "angry-neighbor",
     title: "Angry Neighbor Recode",
     category: "Horror",
