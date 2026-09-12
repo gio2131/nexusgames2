@@ -4,6 +4,7 @@
   var BROKER = "https://ntfy.sh";
   var TOPIC = "nexusgames2-1a4c7dea8781db7fb90af42a7790a6c1cf74";
   var EXPECTED_CODE_HASH = "fb0acaee5923560814b286247054daa162f012f6fa965368d9314da849323f2e";
+  var ACTIVE_WINDOW = 120000;
   var users = Object.create(null);
   var deletedAt = Object.create(null);
   var suppressedSessions = Object.create(null);
@@ -50,7 +51,7 @@
   }
 
   function isTabActive(tab) {
-    return tab.lastSeen && Date.now() - tab.lastSeen < 45000;
+    return tab.lastSeen && Date.now() - tab.lastSeen < ACTIVE_WINDOW;
   }
 
   function activeTabs(user) {
@@ -116,7 +117,7 @@
       id: payload.sessionId,
       page: payload.page || current.page || "Nexus Games",
       sentAt: timestamp,
-      lastSeen: fromHistory ? (current.lastSeen || 0) : Date.now()
+      lastSeen: fromHistory ? Math.max(current.lastSeen || 0, timestamp) : Date.now()
     };
     user.joinedAt = Math.min(user.joinedAt, timestamp);
     render();
@@ -257,7 +258,7 @@
     });
     connect();
     loadHistory();
-    refreshTimer = setInterval(probe, 20000);
+    refreshTimer = setInterval(probe, 15000);
   }
 
   document.getElementById("admin-code-form").addEventListener("submit", async function (event) {

@@ -59,10 +59,10 @@
     }));
   }
 
-  function announce(type, extra) {
+  function announce(type, extra, keepHistory) {
     knownSessions[sessionId] = Date.now();
     updateCount();
-    publish(message(type, extra), type === "join");
+    publish(message(type, extra), Boolean(keepHistory));
   }
 
   function closeSession(commandId) {
@@ -99,7 +99,7 @@
       delete knownSessions[payload.sessionId];
       updateCount();
     } else if (payload.type === "probe") {
-      announce("presence", { nonce: payload.nonce || "" });
+      announce("presence", { nonce: payload.nonce || "" }, false);
     } else if (payload.type === "command" && payload.target === sessionId) {
       if (payload.action === "redirect" && window.Site) {
         var game = Site.findGame(payload.gameId);
@@ -123,7 +123,7 @@
     socket.addEventListener("open", function () {
       var firstJoin = sessionStorage.getItem("nexus:joined") !== "yes";
       if (firstJoin) sessionStorage.setItem("nexus:joined", "yes");
-      announce(firstJoin ? "join" : "presence");
+      announce(firstJoin ? "join" : "presence", null, true);
       publish({ app: "nexusgames2", type: "probe", nonce: makeId(), sentAt: Date.now() }, false);
     });
 
@@ -148,9 +148,8 @@
     sessionStorage.setItem("nexus:sessionId", sessionId);
     connect();
     setInterval(function () {
-      publish({ app: "nexusgames2", type: "probe", nonce: makeId(), sentAt: Date.now() }, false);
-      updateCount();
-    }, 180000);
+      announce("presence", null, true);
+    }, 30000);
   }
 
   function showManagedLauncher() {
@@ -223,6 +222,13 @@
   try { savedName = sessionStorage.getItem("nexus:username") || ""; } catch (error) {}
   if (savedName) start(savedName);
   else showGate();
+
+  document.addEventListener("visibilitychange", function () {
+    if (sessionId && document.visibilityState === "visible") announce("presence", null, true);
+  });
+  window.addEventListener("focus", function () {
+    if (sessionId) announce("presence", null, true);
+  });
 
   window.addEventListener("pagehide", function () {
     if (!sessionId) return;
