@@ -672,7 +672,7 @@ kbd {
 .session-info { min-width: 0; display: grid; gap: 5px; }
 .session-info strong { overflow: hidden; text-overflow: ellipsis; font: 600 1rem var(--display); }
 .session-info span { overflow: hidden; text-overflow: ellipsis; color: var(--muted); font-size: .75rem; white-space: nowrap; }
-.session-actions { display: flex; gap: 8px; }
+.session-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
 .session-actions button {
   min-height: 38px;
   padding: 0 13px;
@@ -686,6 +686,7 @@ kbd {
 .session-actions button:hover:not(:disabled) { border-color: #555; background: #202020; }
 .session-actions button:disabled { opacity: .35; cursor: not-allowed; }
 .session-actions .danger-action { color: #ff8d8d; }
+.session-actions .delete-action { color: #aaa; }
 .admin-empty { padding: 80px 24px; border: 1px solid var(--line); border-radius: 20px; text-align: center; background: var(--panel); }
 .admin-empty h2 { margin: 0 0 8px; font: 600 1.15rem var(--display); }
 .admin-empty p { margin: 0; color: var(--muted); font-size: .82rem; }
