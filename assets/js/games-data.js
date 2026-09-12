@@ -5,6 +5,126 @@
 */
 const GAMES = [
   {
+    id: "worldbox",
+    title: "WorldBox",
+    category: "Sandbox",
+    url: "games/worldbox/index.html",
+    thumb: "assets/img/worldbox.png",
+    featured: false
+  },
+  {
+    id: "undertale-last-breath",
+    title: "Undertale: Last Breath",
+    category: "Action",
+    url: "games/undertale-last-breath/index.html",
+    thumb: "assets/img/undertale-last-breath.png",
+    featured: false
+  },
+  {
+    id: "tabs",
+    title: "Totally Accurate Battle Simulator",
+    category: "Strategy",
+    url: "games/tabs/index.html",
+    thumb: "assets/img/tabs.png",
+    featured: false
+  },
+  {
+    id: "territorial-io",
+    title: "Territorial.io",
+    category: "Strategy",
+    url: "games/territorial-io/index.html",
+    thumb: "assets/img/territorial-io.png",
+    featured: false
+  },
+  {
+    id: "sonic-cd",
+    title: "Sonic CD",
+    category: "Platformer",
+    url: "games/sonic-cd/index.html",
+    thumb: "assets/img/sonic-cd.png",
+    featured: false
+  },
+  {
+    id: "pvz2-gardenless",
+    title: "Plants vs. Zombies 2 Gardenless",
+    category: "Strategy",
+    url: "games/pvz2-gardenless/index.html",
+    thumb: "assets/img/pvz2-gardenless.png",
+    featured: false
+  },
+  {
+    id: "plants-vs-zombies",
+    title: "Plants vs. Zombies",
+    category: "Strategy",
+    url: "games/plants-vs-zombies/index.html",
+    thumb: "assets/img/plants-vs-zombies.png",
+    featured: false
+  },
+  {
+    id: "plague-inc",
+    title: "Plague Inc.",
+    category: "Strategy",
+    url: "games/plague-inc/index.html",
+    thumb: "assets/img/plague-inc.png",
+    featured: false
+  },
+  {
+    id: "people-playground",
+    title: "People Playground",
+    category: "Sandbox",
+    url: "games/people-playground/index.html",
+    thumb: "assets/img/people-playground.png",
+    featured: false
+  },
+  {
+    id: "granny",
+    title: "Granny",
+    category: "Horror",
+    url: "games/granny/index.html",
+    thumb: "assets/img/granny.png",
+    featured: false
+  },
+  {
+    id: "gorilla-tag",
+    title: "Gorilla Tag",
+    category: "Action",
+    url: "games/gorilla-tag/index.html",
+    thumb: "assets/img/gorilla-tag.png",
+    featured: false
+  },
+  {
+    id: "fnaf-world-refreshed",
+    title: "FNaF World: Refreshed",
+    category: "RPG",
+    url: "games/fnaf-world-refreshed/index.html",
+    thumb: "assets/img/fnaf-world-refreshed.png",
+    featured: false
+  },
+  {
+    id: "chat-bot-ai",
+    title: "Chat Bot AI",
+    category: "Tools",
+    url: "games/chat-bot-ai/index.html",
+    thumb: "assets/img/chat-bot-ai.png",
+    featured: false
+  },
+  {
+    id: "bad-time-simulator",
+    title: "Bad Time Simulator",
+    category: "Action",
+    url: "games/bad-time-simulator/index.html",
+    thumb: "assets/img/bad-time-simulator.png",
+    featured: false
+  },
+  {
+    id: "minus-b",
+    title: "Minus B",
+    category: "Horror",
+    url: "games/minus-b/index.html",
+    thumb: "assets/img/minus-b.png",
+    featured: false
+  },
+  {
     id: "openfront",
     title: "OpenFront",
     category: "Strategy",
