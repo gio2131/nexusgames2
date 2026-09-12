@@ -7,6 +7,7 @@
   var sessions = Object.create(null);
   var socket;
   var redirectTarget = "";
+  var imageTarget = "";
   var refreshTimer;
   var list = document.getElementById("session-list");
   var summary = document.getElementById("session-summary");
@@ -14,6 +15,8 @@
   var connection = document.getElementById("admin-connection");
   var dialog = document.getElementById("redirect-dialog");
   var gameSelect = document.getElementById("redirect-game");
+  var imageDialog = document.getElementById("image-dialog");
+  var imageUrl = document.getElementById("image-url");
 
   function makeId() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -27,16 +30,17 @@
     }).catch(function () {});
   }
 
-  function command(target, action, gameId) {
-    return publish({
+  function command(target, action, details) {
+    var payload = {
       app: "nexusgames2",
       type: "command",
       commandId: makeId(),
       target: target,
       action: action,
-      gameId: gameId || "",
       sentAt: Date.now()
-    });
+    };
+    Object.keys(details || {}).forEach(function (key) { payload[key] = details[key]; });
+    return publish(payload);
   }
 
   function absorb(payload, fromHistory) {
@@ -80,11 +84,19 @@
         '<span class="session-dot"></span><div class="session-info"><strong>' + Site.esc(session.username) + "</strong>" +
         "<span>" + Site.esc(active ? session.page : "Last seen " + new Date(session.joinedAt).toLocaleString()) + "</span></div>" +
         '<div class="session-actions"><button type="button" data-action="redirect"' + (active ? "" : " disabled") + ">Redirect</button>" +
+        '<button type="button" data-action="image"' + (active ? "" : " disabled") + ">Show image</button>" +
         '<button type="button" class="danger-action" data-action="close"' + (active ? "" : " disabled") + ">Force close</button></div>";
       row.querySelector('[data-action="redirect"]').addEventListener("click", function () {
         redirectTarget = session.id;
         document.getElementById("redirect-name").textContent = "Redirect " + session.username;
         dialog.showModal();
+      });
+      row.querySelector('[data-action="image"]').addEventListener("click", function () {
+        imageTarget = session.id;
+        imageUrl.value = "";
+        document.getElementById("image-url-error").textContent = "";
+        document.getElementById("image-name").textContent = "Show an image to " + session.username;
+        imageDialog.showModal();
       });
       row.querySelector('[data-action="close"]').addEventListener("click", function () {
         if (confirm("Force close " + session.username + "'s Nexus tab?")) command(session.id, "close");
@@ -169,9 +181,27 @@
   document.getElementById("refresh-sessions").addEventListener("click", probe);
   document.getElementById("redirect-form").addEventListener("submit", function (event) {
     if (event.submitter && event.submitter.value === "confirm" && redirectTarget) {
-      command(redirectTarget, "redirect", gameSelect.value);
+      command(redirectTarget, "redirect", { gameId: gameSelect.value });
     }
     redirectTarget = "";
+  });
+
+  document.getElementById("image-form").addEventListener("submit", function (event) {
+    if (!event.submitter || event.submitter.value !== "confirm" || !imageTarget) {
+      imageTarget = "";
+      return;
+    }
+    var value = imageUrl.value.trim();
+    try {
+      var parsed = new URL(value);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") throw new Error("protocol");
+    } catch (error) {
+      event.preventDefault();
+      document.getElementById("image-url-error").textContent = "Enter a complete http:// or https:// image URL.";
+      return;
+    }
+    command(imageTarget, "image", { imageUrl: value });
+    imageTarget = "";
   });
 
   window.addEventListener("beforeunload", function () { clearInterval(refreshTimer); });

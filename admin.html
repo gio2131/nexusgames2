@@ -7,7 +7,7 @@
   <meta name="robots" content="noindex">
   <title>Control — Nexus Games</title>
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/css/style.css?v=control-1">
+  <link rel="stylesheet" href="assets/css/style.css?v=control-2">
 </head>
 <body class="admin-page">
   <aside class="rail" aria-label="Primary navigation">
@@ -61,8 +61,18 @@
     </form>
   </dialog>
 
+  <dialog class="redirect-dialog" id="image-dialog">
+    <form method="dialog" id="image-form">
+      <div><span class="eyebrow">Show image</span><h2 id="image-name">Send an image</h2></div>
+      <label for="image-url">Image URL</label>
+      <input id="image-url" type="url" inputmode="url" required placeholder="https://example.com/image.png">
+      <small id="image-url-error" aria-live="polite"></small>
+      <div class="dialog-actions"><button class="button button-dark" value="cancel">Cancel</button><button class="button" value="confirm">Show for 5 seconds</button></div>
+    </form>
+  </dialog>
+
   <script src="assets/js/games-data.js?v=games-3"></script>
-  <script src="assets/js/site.js?v=control-1"></script>
-  <script src="assets/js/admin.js?v=control-1"></script>
+  <script src="assets/js/site.js?v=control-2"></script>
+  <script src="assets/js/admin.js?v=control-2"></script>
 </body>
 </html>

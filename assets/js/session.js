@@ -30,6 +30,11 @@
     }).catch(function () {});
   }
 
+  function beacon(payload) {
+    var blob = new Blob([JSON.stringify(payload)], { type: "text/plain" });
+    navigator.sendBeacon(BROKER + "/" + TOPIC + "?cache=no", blob);
+  }
+
   function message(type, extra) {
     var payload = {
       app: "nexusgames2",
@@ -60,12 +65,28 @@
     publish(message(type, extra), type === "join");
   }
 
-  function lockSession() {
-    try { window.open("", "_self"); window.close(); } catch (error) {}
-    document.title = "Session closed — Nexus Games";
-    document.body.innerHTML =
-      '<main class="closed-session"><div class="rail-mark">N</div>' +
-      "<h1>Session closed</h1><p>This Nexus Games tab was closed by the site administrator.</p></main>";
+  function closeSession(commandId) {
+    beacon(message("ack", { action: "close", commandId: commandId }));
+    beacon(message("leave"));
+    try { if (socket) socket.close(); } catch (error) {}
+    window.close();
+    setTimeout(function () { location.replace("about:blank"); }, 120);
+  }
+
+  function showImage(url) {
+    try {
+      var parsed = new URL(url);
+      if (parsed.protocol !== "https:" && parsed.protocol !== "http:") return;
+    } catch (error) { return; }
+
+    var existing = document.querySelector(".remote-image-display");
+    if (existing) existing.remove();
+    var display = document.createElement("div");
+    display.className = "remote-image-display";
+    display.innerHTML = '<img alt="Image sent by the Nexus administrator">';
+    display.querySelector("img").src = url;
+    document.body.appendChild(display);
+    setTimeout(function () { display.remove(); }, 5000);
   }
 
   function handlePayload(payload) {
@@ -87,9 +108,10 @@
           location.href = "play.html?id=" + encodeURIComponent(game.id);
         }
       } else if (payload.action === "close") {
-        publish(message("ack", { action: "close", commandId: payload.commandId }), false);
-        publish(message("leave"), false);
-        lockSession();
+        closeSession(payload.commandId);
+      } else if (payload.action === "image" && payload.imageUrl) {
+        publish(message("ack", { action: "image", commandId: payload.commandId }), false);
+        showImage(payload.imageUrl);
       }
     }
   }
@@ -131,6 +153,45 @@
     }, 180000);
   }
 
+  function showManagedLauncher() {
+    document.title = "Nexus Games launched";
+    document.body.innerHTML =
+      '<main class="closed-session launcher-session"><div class="rail-mark">N</div>' +
+      "<h1>Nexus opened</h1><p>Your managed Nexus tab is ready. This launcher tab can be closed.</p>" +
+      '<a class="button" href="index.html">Open another session <span aria-hidden="true">↗</span></a></main>';
+  }
+
+  function openManagedSession(name, error) {
+    username = name;
+    sessionId = makeId();
+    sessionStorage.setItem("nexus:username", username);
+    sessionStorage.setItem("nexus:sessionId", sessionId);
+    sessionStorage.setItem("nexus:managed", "yes");
+    sessionStorage.removeItem("nexus:joined");
+
+    var target = new URL(location.href);
+    target.searchParams.set("nexusManaged", "1");
+    var managedTab = window.open(target.href, "_blank");
+    if (!managedTab) {
+      sessionStorage.removeItem("nexus:username");
+      sessionStorage.removeItem("nexus:sessionId");
+      sessionStorage.removeItem("nexus:managed");
+      username = "";
+      sessionId = "";
+      error.textContent = "Allow pop-ups for Nexus, then try again. This is required so Force close can close the tab.";
+      return false;
+    }
+
+    sessionStorage.removeItem("nexus:username");
+    sessionStorage.removeItem("nexus:sessionId");
+    sessionStorage.removeItem("nexus:managed");
+    sessionStorage.removeItem("nexus:joined");
+    username = "";
+    sessionId = "";
+    showManagedLauncher();
+    return true;
+  }
+
   function showGate() {
     var gate = document.createElement("div");
     gate.className = "session-gate";
@@ -154,8 +215,7 @@
         error.textContent = "Use between 2 and 24 characters.";
         return;
       }
-      gate.remove();
-      start(name);
+      if (openManagedSession(name, error)) gate.remove();
     });
   }
 
@@ -166,7 +226,6 @@
 
   window.addEventListener("pagehide", function () {
     if (!sessionId) return;
-    var blob = new Blob([JSON.stringify(message("leave"))], { type: "text/plain" });
-    navigator.sendBeacon(BROKER + "/" + TOPIC + "?cache=no", blob);
+    beacon(message("leave"));
   });
 })();
