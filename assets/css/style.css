@@ -717,19 +717,7 @@ kbd {
   font-size: .72rem;
 }
 
-body::before {
-  content: "";
-  position: fixed;
-  z-index: -1;
-  inset: 0;
-  pointer-events: none;
-}
-
-html[data-theme="galaxy"] body,
-html[data-theme="rgb"] body,
-html[data-theme="custom"] body { position: relative; isolation: isolate; background: transparent; }
-
-html[data-theme="galaxy"] body::before {
+html[data-theme="galaxy"] body {
   background-color: #050411;
   background-image:
     radial-gradient(circle at 16% 20%, rgba(126, 86, 255, .5), transparent 28%),
@@ -739,19 +727,23 @@ html[data-theme="galaxy"] body::before {
     radial-gradient(circle, rgba(176,211,255,.7) 0 1px, transparent 1.4px);
   background-size: auto, auto, auto, 82px 82px, 137px 137px;
   background-position: center, center, center, 0 0, 31px 44px;
+  background-attachment: fixed;
 }
 
-html[data-theme="rgb"] body::before {
+html[data-theme="rgb"] body {
   background: linear-gradient(125deg, #330018, #04174a, #003b31, #4d2000, #330018);
   background-size: 400% 400%;
+  background-attachment: fixed;
   animation: rgb-flow 12s ease infinite;
 }
 
-html[data-theme="custom"] body::before {
+html[data-theme="custom"] body {
+  background-color: #050505;
   background-image: linear-gradient(rgba(0,0,0,.22), rgba(0,0,0,.22)), var(--theme-image);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+  background-attachment: fixed;
 }
 
 html[data-theme="galaxy"] .rail,
@@ -950,6 +942,6 @@ button.theme-choice[aria-pressed="true"] { border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { transition: none !important; }
-  html[data-theme="rgb"] body::before { animation: none; }
+  html[data-theme="rgb"] body { animation: none; }
 }
 

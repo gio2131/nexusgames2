@@ -43,5 +43,17 @@
 
   var saved = read();
   apply(saved.theme, saved.imageUrl);
+
+  window.addEventListener("pageshow", function () {
+    var current = read();
+    apply(current.theme, current.imageUrl);
+  });
+
+  window.addEventListener("storage", function (event) {
+    if (event.key !== THEME_KEY && event.key !== IMAGE_KEY) return;
+    var current = read();
+    apply(current.theme, current.imageUrl);
+  });
+
   window.NexusTheme = { apply: apply, read: read, safeImage: safeImage };
 })();
