@@ -38,11 +38,11 @@ svg { display: block; }
 
 .page-shell {
   width: calc(100% - var(--rail));
-  max-width: calc(var(--max) + 112px);
+  max-width: none;
   min-height: 100vh;
   margin-right: var(--rail);
-  margin-left: auto;
-  padding: 0 56px;
+  margin-left: 0;
+  padding: 0 clamp(24px, 3vw, 56px);
   display: flex;
   flex-direction: column;
 }
@@ -53,9 +53,9 @@ svg { display: block; }
   inset: 0 0 0 auto;
   width: var(--rail);
   padding: 20px 12px 24px;
-  border-left: 1px solid var(--line);
-  background: rgba(11, 11, 11, .92);
-  backdrop-filter: blur(18px);
+  border-left: 1px solid rgba(255,255,255,.12);
+  background: rgba(7,7,9,.16);
+  backdrop-filter: blur(14px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -754,6 +754,14 @@ html[data-theme="custom"] body::before {
   background-size: cover;
 }
 
+html[data-theme="galaxy"] .rail,
+html[data-theme="rgb"] .rail,
+html[data-theme="custom"] .rail {
+  border-left-color: rgba(255,255,255,.14);
+  background: rgba(5,5,9,.08);
+  backdrop-filter: blur(10px);
+}
+
 @keyframes rgb-flow {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -866,7 +874,7 @@ button.theme-choice[aria-pressed="true"] { border-color: var(--accent); }
   backdrop-filter: blur(18px);
 }
 .chat-messages:empty::before { content: "No messages yet. Start the conversation."; height: 100%; display: grid; place-items: center; color: #666; font-size: .85rem; }
-.chat-message { max-width: 78%; margin-bottom: 18px; }
+.chat-message { width: fit-content; max-width: min(72%, 560px); margin-bottom: 14px; }
 .chat-message strong { margin: 0 0 6px 4px; display: block; color: #aaa; font: 600 .72rem var(--display); }
 .chat-message p { margin: 0; padding: 12px 15px; border: 1px solid #2a2a2a; border-radius: 6px 16px 16px 16px; background: #151515; line-height: 1.45; overflow-wrap: anywhere; }
 .chat-message.is-own { margin-left: auto; }
@@ -898,7 +906,8 @@ button.theme-choice[aria-pressed="true"] { border-color: var(--accent); }
     border-radius: 20px;
     flex-direction: row;
     justify-content: center;
-    background: rgba(14,14,14,.94);
+    background: rgba(7,7,9,.28);
+    backdrop-filter: blur(14px);
   }
   .rail-mark, .rail-status { display: none; }
   .rail-nav { width: 100%; margin: 0; grid-template-columns: repeat(4, 1fr); gap: 4px; }
@@ -935,7 +944,7 @@ button.theme-choice[aria-pressed="true"] { border-color: var(--accent); }
   .chat-name-card { padding: 28px 22px; }
   .chat-heading { align-items: flex-start; flex-direction: column; }
   .chat-messages { min-height: 390px; padding: 18px; }
-  .chat-message { max-width: 90%; }
+  .chat-message { max-width: 85%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
