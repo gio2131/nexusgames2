@@ -12,6 +12,7 @@
   var redirectTarget = "";
   var imageTarget = "";
   var refreshTimer;
+  var polling = false;
   var list = document.getElementById("session-list");
   var summary = document.getElementById("session-summary");
   var activeCount = document.getElementById("active-count");
@@ -47,7 +48,7 @@
       sentAt: Date.now()
     };
     Object.keys(details || {}).forEach(function (key) { payload[key] = details[key]; });
-    return publish(payload, false);
+    return publish(payload, true);
   }
 
   function isTabActive(tab) {
@@ -202,28 +203,10 @@
     setTimeout(render, 2200);
   }
 
-  function connect() {
-    connection.textContent = "live";
-    socket = new WebSocket("wss://ntfy.sh/" + TOPIC + "/ws");
-    socket.addEventListener("open", function () {
-      connection.textContent = "live";
-      probe();
-    });
-    socket.addEventListener("message", function (event) {
-      try {
-        var outer = JSON.parse(event.data);
-        if (outer.event === "message") absorb(JSON.parse(outer.message), false);
-      } catch (error) {}
-    });
-    socket.addEventListener("close", function () {
-      connection.textContent = "retrying";
-      setTimeout(connect, 3000);
-    });
-    socket.addEventListener("error", function () { socket.close(); });
-  }
-
-  function loadHistory() {
-    fetch(BROKER + "/" + TOPIC + "/json?poll=1&since=12h")
+  function pollUpdates(since) {
+    if (polling) return Promise.resolve();
+    polling = true;
+    return fetch(BROKER + "/" + TOPIC + "/json?poll=1&since=" + encodeURIComponent(since || "3m"), { cache: "no-store" })
       .then(function (response) { return response.text(); })
       .then(function (text) {
         var messages = [];
@@ -235,9 +218,40 @@
         });
         messages.sort(function (a, b) { return (Number(a.sentAt) || 0) - (Number(b.sentAt) || 0); });
         messages.forEach(function (payload) { absorb(payload, true); });
+        connection.textContent = socket && socket.readyState === WebSocket.OPEN ? "live" : "polling";
       })
-      .catch(function () {})
-      .finally(probe);
+      .catch(function () { connection.textContent = "retrying"; })
+      .finally(function () { polling = false; });
+  }
+
+  function connect() {
+    connection.textContent = "live";
+    try {
+      socket = new WebSocket("wss://ntfy.sh/" + TOPIC + "/ws");
+    } catch (error) {
+      connection.textContent = "polling";
+      setTimeout(connect, 5000);
+      return;
+    }
+    socket.addEventListener("open", function () {
+      connection.textContent = "live";
+      probe();
+    });
+    socket.addEventListener("message", function (event) {
+      try {
+        var outer = JSON.parse(event.data);
+        if (outer.event === "message") absorb(JSON.parse(outer.message), false);
+      } catch (error) {}
+    });
+    socket.addEventListener("close", function () {
+      connection.textContent = "polling";
+      setTimeout(connect, 3000);
+    });
+    socket.addEventListener("error", function () { socket.close(); });
+  }
+
+  function loadHistory() {
+    pollUpdates("12h").finally(probe);
   }
 
   async function hash(value) {
@@ -258,7 +272,10 @@
     });
     connect();
     loadHistory();
-    refreshTimer = setInterval(probe, 15000);
+    refreshTimer = setInterval(function () {
+      pollUpdates("3m");
+      probe();
+    }, 10000);
   }
 
   document.getElementById("admin-code-form").addEventListener("submit", async function (event) {
@@ -273,7 +290,10 @@
     unlock();
   });
 
-  document.getElementById("refresh-sessions").addEventListener("click", probe);
+  document.getElementById("refresh-sessions").addEventListener("click", function () {
+    pollUpdates("3m");
+    probe();
+  });
   document.getElementById("redirect-form").addEventListener("submit", function (event) {
     if (event.submitter && event.submitter.value === "confirm" && redirectTarget) {
       commandUser(redirectTarget, "redirect", { gameId: gameSelect.value });

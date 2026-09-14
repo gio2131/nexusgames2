@@ -5,6 +5,94 @@
 */
 const GAMES = [
   {
+    id: "baldis-basics-plus",
+    title: "Baldi's Basics Plus",
+    category: "Horror",
+    url: "games/baldis-basics-plus/index.html",
+    thumb: "assets/img/baldis-basics-plus.jpg",
+    featured: false
+  },
+  {
+    id: "doge-miner",
+    title: "Doge Miner",
+    category: "Idle",
+    url: "games/doge-miner/index.html",
+    thumb: "assets/img/doge-miner.png",
+    featured: false
+  },
+  {
+    id: "fnaf-1",
+    title: "Five Nights at Freddy's",
+    category: "Horror",
+    url: "games/fnaf-1/index.html",
+    thumb: "assets/img/fnaf-1.jpg",
+    featured: false
+  },
+  {
+    id: "fnaf-2",
+    title: "Five Nights at Freddy's 2",
+    category: "Horror",
+    url: "games/fnaf-2/index.html",
+    thumb: "assets/img/fnaf-2.jpg",
+    featured: false
+  },
+  {
+    id: "fnaf-3",
+    title: "Five Nights at Freddy's 3",
+    category: "Horror",
+    url: "games/fnaf-3/index.html",
+    thumb: "assets/img/fnaf-3.jpg",
+    featured: false
+  },
+  {
+    id: "fnaf-4",
+    title: "Five Nights at Freddy's 4",
+    category: "Horror",
+    url: "games/fnaf-4/index.html",
+    thumb: "assets/img/fnaf-4.jpg",
+    featured: false
+  },
+  {
+    id: "fnaf-4-halloween",
+    title: "Five Nights at Freddy's 4: Halloween",
+    category: "Horror",
+    url: "games/fnaf-4-halloween/index.html",
+    thumb: "assets/img/fnaf-4-halloween.jpg",
+    featured: false
+  },
+  {
+    id: "fnaf-sister-location",
+    title: "Five Nights at Freddy's: Sister Location",
+    category: "Horror",
+    url: "games/fnaf-sister-location/index.html",
+    thumb: "assets/img/fnaf-sister-location.jpg",
+    featured: false
+  },
+  {
+    id: "fnaf-ultimate-custom-night",
+    title: "Five Nights at Freddy's: Ultimate Custom Night",
+    category: "Horror",
+    url: "games/fnaf-ultimate-custom-night/index.html",
+    thumb: "assets/img/fnaf-ultimate-custom-night.jpg",
+    featured: false
+  },
+  {
+    id: "solar-smash",
+    title: "Solar Smash",
+    category: "Simulation",
+    url: "games/solar-smash/index.html",
+    thumb: "assets/img/solar-smash.jpg",
+    featured: false
+  },
+  {
+    id: "terraria",
+    title: "Terraria",
+    category: "Sandbox",
+    url: "games/terraria/index.html",
+    thumb: "assets/img/terraria.jpg",
+    featured: false
+  },
+  {
     id: "worldbox",
     title: "WorldBox",
     category: "Sandbox",
@@ -101,14 +189,6 @@ const GAMES = [
     featured: false
   },
   {
-    id: "chat-bot-ai",
-    title: "Chat Bot AI",
-    category: "Tools",
-    url: "games/chat-bot-ai/index.html",
-    thumb: "assets/img/chat-bot-ai.png",
-    featured: false
-  },
-  {
     id: "bad-time-simulator",
     title: "Bad Time Simulator",
     category: "Action",
@@ -122,15 +202,6 @@ const GAMES = [
     category: "Horror",
     url: "games/minus-b/index.html",
     thumb: "assets/img/minus-b.png",
-    featured: false
-  },
-  {
-    id: "openfront",
-    title: "OpenFront",
-    category: "Strategy",
-    url: "https://openfront.io",
-    thumb: "assets/img/openfront.png",
-    external: true,
     featured: false
   },
   {

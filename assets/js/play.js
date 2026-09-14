@@ -33,7 +33,7 @@
       stage.innerHTML =
         '<div class="external-game">' +
         '<img src="' + Site.esc(game.thumb) + '" alt="">' +
-        "<p>OpenFront blocks embedded play on other websites, so this build has to launch from its own server.</p>" +
+        "<p>This title runs on its own server and cannot be embedded here.</p>" +
         '<a class="button" href="' + Site.esc(game.url) + '" rel="noopener">Launch game <span aria-hidden="true">↗</span></a>' +
         "</div>";
       return;

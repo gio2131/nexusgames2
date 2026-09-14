@@ -9,6 +9,7 @@
   var socket;
   var reconnectTimer;
   var knownSessions = Object.create(null);
+  var processedCommands = Object.create(null);
 
   function makeId() {
     if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
@@ -30,9 +31,9 @@
     }).catch(function () {});
   }
 
-  function beacon(payload) {
+  function beacon(payload, keepHistory) {
     var blob = new Blob([JSON.stringify(payload)], { type: "text/plain" });
-    navigator.sendBeacon(BROKER + "/" + TOPIC + "?cache=no", blob);
+    navigator.sendBeacon(BROKER + "/" + TOPIC + (keepHistory ? "" : "?cache=no"), blob);
   }
 
   function message(type, extra) {
@@ -66,8 +67,8 @@
   }
 
   function closeSession(commandId) {
-    beacon(message("ack", { action: "close", commandId: commandId }));
-    beacon(message("leave"));
+    beacon(message("ack", { action: "close", commandId: commandId }), false);
+    beacon(message("leave"), true);
     try { if (socket) socket.close(); } catch (error) {}
     window.close();
     setTimeout(function () { location.replace("about:blank"); }, 120);
@@ -101,6 +102,17 @@
     } else if (payload.type === "probe") {
       announce("presence", { nonce: payload.nonce || "" }, false);
     } else if (payload.type === "command" && payload.target === sessionId) {
+      var commandId = payload.commandId || [payload.target, payload.action, payload.sentAt].join(":");
+      if (processedCommands[commandId]) return;
+      processedCommands[commandId] = true;
+      try {
+        var savedCommands = JSON.parse(sessionStorage.getItem("nexus:commands") || "{}");
+        savedCommands[commandId] = Date.now();
+        Object.keys(savedCommands).forEach(function (id) {
+          if (Date.now() - savedCommands[id] > 300000) delete savedCommands[id];
+        });
+        sessionStorage.setItem("nexus:commands", JSON.stringify(savedCommands));
+      } catch (error) {}
       if (payload.action === "redirect" && window.Site) {
         var game = Site.findGame(payload.gameId);
         if (game) {
@@ -116,9 +128,31 @@
     }
   }
 
+  function pollMessages() {
+    fetch(BROKER + "/" + TOPIC + "/json?poll=1&since=2m", { cache: "no-store" })
+      .then(function (response) { return response.text(); })
+      .then(function (text) {
+        var messages = [];
+        text.trim().split("\n").forEach(function (line) {
+          try {
+            var outer = JSON.parse(line);
+            if (outer.event === "message") messages.push(JSON.parse(outer.message));
+          } catch (error) {}
+        });
+        messages.sort(function (a, b) { return (Number(a.sentAt) || 0) - (Number(b.sentAt) || 0); });
+        messages.forEach(handlePayload);
+      })
+      .catch(function () {});
+  }
+
   function connect() {
     clearTimeout(reconnectTimer);
-    socket = new WebSocket(SOCKET_URL);
+    try {
+      socket = new WebSocket(SOCKET_URL);
+    } catch (error) {
+      reconnectTimer = setTimeout(connect, 5000);
+      return;
+    }
 
     socket.addEventListener("open", function () {
       var firstJoin = sessionStorage.getItem("nexus:joined") !== "yes";
@@ -146,10 +180,17 @@
     sessionId = sessionStorage.getItem("nexus:sessionId") || makeId();
     sessionStorage.setItem("nexus:username", username);
     sessionStorage.setItem("nexus:sessionId", sessionId);
+    try {
+      var savedCommands = JSON.parse(sessionStorage.getItem("nexus:commands") || "{}");
+      Object.keys(savedCommands).forEach(function (id) { processedCommands[id] = true; });
+    } catch (error) {}
+    announce("presence", null, true);
     connect();
+    pollMessages();
     setInterval(function () {
       announce("presence", null, true);
     }, 30000);
+    setInterval(pollMessages, 5000);
   }
 
   function showManagedLauncher() {
@@ -232,6 +273,6 @@
 
   window.addEventListener("pagehide", function () {
     if (!sessionId) return;
-    beacon(message("leave"));
+    beacon(message("leave"), true);
   });
 })();
