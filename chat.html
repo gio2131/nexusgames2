@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#070707">
-  <meta name="robots" content="noindex">
-  <title>Play — Nexus Games</title>
+  <meta name="description" content="Chat with other Nexus Games players.">
+  <title>Chat — Nexus Games</title>
   <link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
   <script src="assets/js/theme.js?v=theme-1"></script>
   <link rel="stylesheet" href="assets/css/style.css?v=theme-1">
@@ -24,23 +24,38 @@
   <div class="page-shell">
     <header class="topbar">
       <a class="wordmark" href="index.html"><span>N</span> NEXUS GAMES</a>
-      <p><i></i> Player</p>
+      <p><i></i> Community chat</p>
     </header>
 
-    <main class="inner-main player-main">
-      <a class="back-link" href="games.html">← Back to catalog</a>
-      <div class="player-bar">
-        <div><span class="eyebrow" id="game-cat">Loading</span><h1 id="game-title">Loading</h1></div>
-        <button class="button button-dark" type="button" id="fullscreen">Fullscreen ↗</button>
-      </div>
-      <div class="stage" id="stage"></div>
-    </main>
+    <main class="inner-main chat-main">
+      <section class="chat-gate" id="chat-gate">
+        <form class="chat-name-card" id="chat-name-form">
+          <span class="chat-mark"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v12H8l-4 3z"/><path d="M8 9h8M8 13h5"/></svg></span>
+          <p class="eyebrow">Nexus chat</p>
+          <h1>Enter a username</h1>
+          <p>You choose a fresh username every time you enter the chat.</p>
+          <label for="chat-username">Username</label>
+          <input id="chat-username" maxlength="24" minlength="2" autocomplete="off" required placeholder="Enter a username">
+          <button class="button" type="submit">Enter chat <span aria-hidden="true">→</span></button>
+          <small id="chat-name-error" aria-live="polite"></small>
+        </form>
+      </section>
 
+      <section class="chat-room" id="chat-room" hidden>
+        <div class="chat-heading">
+          <div><span class="eyebrow">Community</span><h1>Chatroom</h1><p id="chat-room-note">Messages clear every hour.</p></div>
+          <span class="chat-status"><i></i><b id="chat-status">Connecting…</b></span>
+        </div>
+        <div class="chat-messages" id="chat-messages" aria-live="polite" aria-label="Chat messages"></div>
+        <form class="chat-compose" id="chat-form">
+          <input id="chat-message" maxlength="300" autocomplete="off" required placeholder="Write a message…" aria-label="Message">
+          <button class="button" id="chat-send" type="submit">Send</button>
+        </form>
+      </section>
+    </main>
   </div>
 
-  <script src="assets/js/games-data.js?v=games-4"></script>
   <script src="assets/js/site.js?v=theme-1"></script>
-  <script src="assets/js/play.js?v=games-4"></script>
+  <script src="assets/js/chat.js?v=chat-1"></script>
 </body>
 </html>
-
