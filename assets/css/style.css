@@ -164,28 +164,7 @@ svg { display: block; }
   pointer-events: none;
 }
 .chat-drawer.is-open { transform: translateX(0); pointer-events: auto; }
-.chat-drawer > header {
-  height: 54px;
-  padding: 0 12px 0 18px;
-  border-bottom: 1px solid rgba(255,255,255,.1);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.chat-drawer > header strong { font: 600 .82rem var(--display); letter-spacing: .04em; }
-.chat-drawer > header button {
-  width: 34px;
-  height: 34px;
-  border: 1px solid #353535;
-  border-radius: 10px;
-  cursor: pointer;
-  color: var(--ink);
-  background: rgba(25,25,25,.84);
-  font-size: 1.35rem;
-  line-height: 1;
-}
-.chat-drawer > header button:hover { border-color: #555; background: #222; }
-.chat-drawer iframe { width: 100%; height: calc(100% - 54px); border: 0; display: block; }
+.chat-drawer iframe { width: 100%; height: 100%; border: 0; display: block; }
 
 .topbar {
   min-height: 88px;
@@ -921,7 +900,12 @@ button.theme-choice[aria-pressed="true"] { border-color: var(--accent); }
 .chat-compose .button { min-width: 100px; }
 
 html[data-chat-panel="true"],
-html[data-chat-panel="true"] body { min-height: 100%; overflow: hidden; }
+html[data-chat-panel="true"] body {
+  min-height: 100%;
+  overflow: hidden;
+  background: #080808 !important;
+  animation: none !important;
+}
 html[data-chat-panel="true"] .rail,
 html[data-chat-panel="true"] .topbar,
 html[data-chat-panel="true"] .site-footer { display: none; }
@@ -940,12 +924,11 @@ html[data-chat-panel="true"] .chat-mark { width: 44px; height: 44px; margin-bott
 html[data-chat-panel="true"] .chat-room {
   height: 100%;
   min-height: 0;
-  padding: 18px 14px 14px;
+  padding: 12px;
   display: flex;
   flex-direction: column;
 }
-html[data-chat-panel="true"] .chat-heading { margin-bottom: 12px; align-items: flex-start; }
-html[data-chat-panel="true"] .chat-heading h1 { margin: 3px 0; font-size: 2rem; }
+html[data-chat-panel="true"] .chat-heading { display: none; }
 html[data-chat-panel="true"] .chat-messages {
   height: auto;
   min-height: 0;

@@ -65,21 +65,21 @@
     drawer.id = "chat-drawer";
     drawer.setAttribute("aria-label", "Nexus chat");
     drawer.setAttribute("aria-hidden", "true");
-    drawer.innerHTML =
-      '<header><strong>Live chat</strong><button type="button" aria-label="Close chat">×</button></header>' +
-      '<iframe title="Nexus live chat" loading="lazy"></iframe>';
+    drawer.innerHTML = '<iframe title="Nexus live chat" loading="lazy"></iframe>';
     document.body.appendChild(drawer);
 
     var frame = drawer.querySelector("iframe");
-    var close = drawer.querySelector("button");
 
     function openChat(event) {
       if (event) event.preventDefault();
+      if (drawer.classList.contains("is-open")) {
+        closeChat();
+        return;
+      }
       frame.src = "chat.html?panel=1&opened=" + Date.now();
       drawer.classList.add("is-open");
       drawer.setAttribute("aria-hidden", "false");
       chatLinks.forEach(function (link) { link.setAttribute("aria-expanded", "true"); });
-      close.focus();
     }
 
     function closeChat() {
@@ -94,7 +94,6 @@
       link.setAttribute("aria-expanded", "false");
       link.addEventListener("click", openChat);
     });
-    close.addEventListener("click", closeChat);
     document.addEventListener("keydown", function (event) {
       if (event.key === "Escape" && drawer.classList.contains("is-open")) closeChat();
     });
