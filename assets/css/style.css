@@ -65,15 +65,19 @@ svg { display: block; }
   width: 48px;
   height: 48px;
   border-radius: 15px;
+  overflow: hidden;
   display: grid;
   place-items: center;
   color: var(--accent-ink);
-  background: var(--accent);
+  background: #171717;
   box-shadow: 0 10px 34px rgba(216, 255, 62, .16);
   font-family: var(--display);
   font-size: 1.25rem;
   font-weight: 700;
 }
+
+.rail-mark img,
+.wordmark span img { width: 100%; height: 100%; display: block; object-fit: cover; }
 
 .rail-nav {
   display: grid;
@@ -166,6 +170,7 @@ svg { display: block; }
   place-items: center;
   border: 1px solid #373737;
   border-radius: 8px;
+  overflow: hidden;
   color: var(--ink);
   font-size: .72rem;
   letter-spacing: 0;
