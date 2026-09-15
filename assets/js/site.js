@@ -85,6 +85,49 @@
     closeButton.focus();
   }
 
+  function initializeAdminPrank() {
+    document.querySelectorAll("[data-admin-prank]").forEach(function (button) {
+      button.addEventListener("click", function (event) {
+        event.preventDefault();
+        if (document.querySelector(".admin-prank-overlay")) return;
+
+        var overlay = document.createElement("div");
+        overlay.className = "admin-prank-overlay";
+        overlay.innerHTML =
+          '<img src="assets/img/admin-prank.gif" alt="">' +
+          '<button class="admin-prank-close" type="button" aria-label="Close prank">×</button>';
+        document.body.appendChild(overlay);
+
+        var closing = false;
+        function removeOverlay() {
+          overlay.remove();
+          document.removeEventListener("keydown", onKeydown);
+          document.removeEventListener("fullscreenchange", onFullscreenChange);
+        }
+        function closePrank() {
+          if (closing) return;
+          closing = true;
+          if (document.fullscreenElement === overlay && document.exitFullscreen) {
+            document.exitFullscreen().catch(function () {}).finally(removeOverlay);
+          } else {
+            removeOverlay();
+          }
+        }
+        function onKeydown(keyEvent) {
+          if (keyEvent.key === "Escape") closePrank();
+        }
+        function onFullscreenChange() {
+          if (!document.fullscreenElement && overlay.isConnected) closePrank();
+        }
+
+        overlay.querySelector(".admin-prank-close").addEventListener("click", closePrank);
+        document.addEventListener("keydown", onKeydown);
+        document.addEventListener("fullscreenchange", onFullscreenChange);
+        if (overlay.requestFullscreen) overlay.requestFullscreen().catch(function () {});
+      });
+    });
+  }
+
   function initializeChrome() {
     var current = location.pathname.split("/").pop() || "index.html";
     document.querySelectorAll("[data-page]").forEach(function (link) {
@@ -93,6 +136,7 @@
 
     if (document.documentElement.dataset.chatPanel === "true") return;
     initializeChangelog();
+    initializeAdminPrank();
 
     var chatLinks = document.querySelectorAll('[data-page="chat.html"]');
     if (!chatLinks.length) return;
