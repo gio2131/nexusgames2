@@ -147,6 +147,37 @@ svg { display: block; }
   box-shadow: 0 0 12px rgba(216, 255, 62, .7);
 }
 
+.changelog-overlay {
+  position: fixed;
+  z-index: 100;
+  inset: 0;
+  padding: 24px;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,.68);
+  backdrop-filter: blur(12px);
+}
+
+.changelog-modal {
+  width: min(100%, 600px);
+  padding: clamp(28px, 5vw, 46px);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 24px;
+  background: rgba(11,11,12,.96);
+  box-shadow: 0 28px 90px rgba(0,0,0,.55);
+}
+
+.changelog-modal h2 {
+  margin: 10px 0 28px;
+  font: 600 clamp(2.8rem, 8vw, 5rem)/.95 var(--display);
+  letter-spacing: -.06em;
+}
+
+.changelog-copy { display: grid; gap: 18px; }
+.changelog-copy p { margin: 0; color: #aaa; line-height: 1.65; }
+.changelog-copy strong { color: var(--ink); }
+.changelog-close { margin-top: 30px; }
+
 .chat-drawer {
   position: fixed;
   z-index: 29;

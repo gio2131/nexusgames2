@@ -49,6 +49,42 @@
     return null;
   }
 
+  function initializeChangelog() {
+    var key = "nexus:changelog:games-september-2026";
+    try {
+      if (localStorage.getItem(key) === "seen") return;
+    } catch (error) {}
+
+    var overlay = document.createElement("div");
+    overlay.className = "changelog-overlay";
+    overlay.innerHTML =
+      '<section class="changelog-modal" role="dialog" aria-modal="true" aria-labelledby="changelog-title">' +
+      '<span class="eyebrow">Latest update</span>' +
+      '<h2 id="changelog-title">Changelogs</h2>' +
+      '<div class="changelog-copy"><p><strong>New games:</strong> How to Fish, Ages of Conflict, Clustertruck</p>' +
+      '<p><strong>Quick Notes:</strong> How to Fish is multiplayer—host a code and have another person join it. Gorilla Tag works the same way.</p></div>' +
+      '<button class="button changelog-close" type="button">Got it</button>' +
+      '</section>';
+    document.body.appendChild(overlay);
+
+    var closeButton = overlay.querySelector(".changelog-close");
+    function dismiss() {
+      try { localStorage.setItem(key, "seen"); } catch (error) {}
+      overlay.remove();
+      document.removeEventListener("keydown", onKeydown);
+    }
+    function onKeydown(event) {
+      if (event.key === "Escape") dismiss();
+    }
+
+    closeButton.addEventListener("click", dismiss);
+    overlay.addEventListener("click", function (event) {
+      if (event.target === overlay) dismiss();
+    });
+    document.addEventListener("keydown", onKeydown);
+    closeButton.focus();
+  }
+
   function initializeChrome() {
     var current = location.pathname.split("/").pop() || "index.html";
     document.querySelectorAll("[data-page]").forEach(function (link) {
@@ -56,6 +92,7 @@
     });
 
     if (document.documentElement.dataset.chatPanel === "true") return;
+    initializeChangelog();
 
     var chatLinks = document.querySelectorAll('[data-page="chat.html"]');
     if (!chatLinks.length) return;
