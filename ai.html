@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#070707">
-  <meta name="description" content="Customize the Nexus Games appearance.">
-  <title>Settings — Nexus Games</title>
+  <meta name="description" content="A private academic AI assistant with web search.">
+  <title>AI — Nexus Games</title>
   <link rel="icon" href="assets/img/nexus-logo.png?v=brand-1" type="image/png">
   <script src="assets/js/theme.js?v=theme-3"></script>
   <link rel="stylesheet" href="assets/css/style.css?v=ai-1">
@@ -25,36 +25,28 @@
   <div class="page-shell">
     <header class="topbar">
       <a class="wordmark" href="index.html"><span><img src="assets/img/nexus-logo.png?v=brand-1" alt=""></span> NEXUS GAMES</a>
-      <p><i></i> Settings</p>
+      <p><i></i> Search enabled</p>
     </header>
 
-    <main class="inner-main settings-main">
-      <div class="page-heading settings-heading">
-        <h1>Settings</h1>
-        <p>Make Nexus look like yours.</p>
+    <main class="inner-main ai-main">
+      <div class="ai-heading">
+        <div><span class="eyebrow">Private workspace</span><h1>Study AI</h1><p>Your chat history is saved only in this browser.</p></div>
+        <button class="text-button" id="ai-clear" type="button">Clear chat</button>
       </div>
-      <div class="settings-tabs" role="tablist" aria-label="Settings sections">
-        <button type="button" role="tab" aria-selected="true">Themes</button>
-      </div>
-      <section class="settings-panel" aria-labelledby="themes-title">
-        <div class="settings-panel-heading"><span class="eyebrow">Appearance</span><h2 id="themes-title">Themes</h2></div>
-        <div class="theme-grid">
-          <button class="theme-choice galaxy-choice" type="button" data-theme-choice="galaxy" aria-pressed="false"><span></span><strong>Galaxy</strong><small>Deep space and stars</small></button>
-          <button class="theme-choice rgb-choice" type="button" data-theme-choice="rgb" aria-pressed="false"><span></span><strong>RGB</strong><small>Animated color flow</small></button>
-          <div class="theme-choice custom-choice">
-            <span></span><strong>Custom Image URL</strong><small>Fills the screen with no black bars</small>
-            <form id="custom-theme-form">
-              <input id="custom-image-url" type="url" inputmode="url" required placeholder="https://example.com/background.jpg" aria-label="Custom background image URL">
-              <button class="button" type="submit">Apply</button>
-            </form>
-          </div>
-        </div>
-        <div class="theme-footer"><span id="theme-feedback" aria-live="polite">Dark theme</span><button id="reset-theme" class="text-button" type="button">Reset theme</button></div>
+
+      <section class="ai-shell" aria-label="AI assistant">
+        <div class="ai-messages" id="ai-messages" aria-live="polite"></div>
+        <form class="ai-compose" id="ai-form">
+          <textarea id="ai-prompt" maxlength="4000" rows="1" required placeholder="Ask a question…" aria-label="Message Study AI"></textarea>
+          <button class="button" id="ai-send" type="submit">Send</button>
+        </form>
+        <p class="ai-note" id="ai-status">Uses a lightweight model with web search. AI can make mistakes—check important sources.</p>
       </section>
     </main>
   </div>
 
+  <script src="https://js.puter.com/v2/"></script>
   <script src="assets/js/site.js?v=chat-panel-2"></script>
-  <script src="assets/js/settings.js?v=theme-3"></script>
+  <script src="assets/js/ai.js?v=ai-1"></script>
 </body>
 </html>

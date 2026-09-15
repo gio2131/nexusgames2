@@ -5,6 +5,14 @@
 */
 const GAMES = [
   {
+    id: "how-to-fish",
+    title: "How to Fish",
+    category: "Simulation",
+    url: "games/how-to-fish/index.html",
+    thumb: "assets/img/how-to-fish.jpg",
+    featured: false
+  },
+  {
     id: "baldis-basics-plus",
     title: "Baldi's Basics Plus",
     category: "Horror",
