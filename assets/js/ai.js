@@ -1,141 +1,186 @@
-(function () {
-  "use strict";
+import { CreateMLCEngine } from "https://esm.run/@mlc-ai/web-llm";
 
-  var STORAGE_KEY = "nexus:studyAi:history:v1";
-  var MODEL = "openai/gpt-5.6-luna";
-  var MAX_HISTORY = 24;
-  var history = [];
-  var busy = false;
+const STORAGE_KEY = "nexus:studyAi:history:v2";
+const MODEL = "Llama-3.2-1B-Instruct-q4f16_1-MLC";
+const MAX_HISTORY = 20;
+const WIKIPEDIA_ENDPOINT = "https://en.wikipedia.org/w/api.php";
 
-  var list = document.getElementById("ai-messages");
-  var form = document.getElementById("ai-form");
-  var input = document.getElementById("ai-prompt");
-  var send = document.getElementById("ai-send");
-  var clear = document.getElementById("ai-clear");
-  var status = document.getElementById("ai-status");
+let history = [];
+let engine = null;
+let enginePromise = null;
+let busy = false;
 
-  function load() {
-    try {
-      var saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-      if (Array.isArray(saved)) {
-        history = saved.filter(function (item) {
-          return item && (item.role === "user" || item.role === "assistant") && typeof item.content === "string";
-        }).slice(-MAX_HISTORY);
-      }
-    } catch (error) {
-      history = [];
+const list = document.getElementById("ai-messages");
+const form = document.getElementById("ai-form");
+const input = document.getElementById("ai-prompt");
+const send = document.getElementById("ai-send");
+const clear = document.getElementById("ai-clear");
+const status = document.getElementById("ai-status");
+
+function loadHistory() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    if (Array.isArray(saved)) {
+      history = saved.filter((item) => item && ["user", "assistant"].includes(item.role) && typeof item.content === "string").slice(-MAX_HISTORY);
     }
-  }
-
-  function save() {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-MAX_HISTORY))); } catch (error) {}
-  }
-
-  function render() {
-    list.innerHTML = "";
-    if (!history.length) {
-      var welcome = document.createElement("div");
-      welcome.className = "ai-welcome";
-      welcome.innerHTML = "<strong>What are you working on?</strong><p>Ask for explanations, research help, study guides, outlines, or source-backed answers.</p>";
-      list.appendChild(welcome);
-      return;
-    }
-
-    history.forEach(function (item) {
-      var article = document.createElement("article");
-      article.className = "ai-message is-" + item.role;
-      var label = document.createElement("strong");
-      label.textContent = item.role === "user" ? "You" : "Study AI";
-      var bubble = document.createElement("p");
-      bubble.textContent = item.content;
-      article.appendChild(label);
-      article.appendChild(bubble);
-      list.appendChild(article);
-    });
-    list.scrollTop = list.scrollHeight;
-  }
-
-  function textFrom(value) {
-    if (typeof value === "string") return value;
-    if (Array.isArray(value)) return value.map(textFrom).filter(Boolean).join("\n");
-    if (!value || typeof value !== "object") return "";
-    if (typeof value.text === "string") return value.text;
-    if (typeof value.content === "string") return value.content;
-    if (value.content) return textFrom(value.content);
-    return "";
-  }
-
-  function responseText(response) {
-    if (typeof response === "string") return response;
-    if (!response) return "";
-    return textFrom(response.message && response.message.content) ||
-      textFrom(response.content) ||
-      textFrom(response.text);
-  }
-
-  function setBusy(value) {
-    busy = value;
-    send.disabled = value;
-    input.disabled = value;
-    status.textContent = value
-      ? "Searching and thinking…"
-      : "Uses a lightweight model with web search. AI can make mistakes—check important sources.";
-  }
-
-  form.addEventListener("submit", function (event) {
-    event.preventDefault();
-    var prompt = input.value.trim();
-    if (!prompt || busy) return;
-    if (!window.puter || !puter.ai || !puter.ai.chat) {
-      status.textContent = "The AI service could not load on this network.";
-      return;
-    }
-
-    history.push({ role: "user", content: prompt });
-    history = history.slice(-MAX_HISTORY);
-    input.value = "";
-    save();
-    render();
-    setBusy(true);
-
-    var messages = [{
-      role: "system",
-      content: "You are Study AI, a clear academic assistant. Explain concepts accurately, help users learn instead of doing dishonest work for them, use web search for current or source-dependent questions, and include useful source names or links when search informs the answer. Clearly label uncertainty."
-    }].concat(history);
-
-    puter.ai.chat(messages, {
-      model: MODEL,
-      tools: [{ type: "web_search" }]
-    }).then(function (response) {
-      var answer = responseText(response).trim() || "I couldn't produce an answer. Please try rephrasing the question.";
-      history.push({ role: "assistant", content: answer });
-      history = history.slice(-MAX_HISTORY);
-      save();
-      render();
-      setBusy(false);
-      input.focus();
-    }).catch(function (error) {
-      setBusy(false);
-      status.textContent = "The AI request failed. Sign in if prompted, then try again.";
-      input.focus();
-    });
-  });
-
-  input.addEventListener("keydown", function (event) {
-    if (event.key === "Enter" && !event.shiftKey) {
-      event.preventDefault();
-      form.requestSubmit();
-    }
-  });
-
-  clear.addEventListener("click", function () {
+  } catch (_) {
     history = [];
-    save();
-    render();
-    input.focus();
-  });
+  }
+}
 
-  load();
+function saveHistory() {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(history.slice(-MAX_HISTORY)));
+  } catch (_) {}
+}
+
+function render() {
+  list.innerHTML = "";
+  if (!history.length) {
+    const welcome = document.createElement("div");
+    welcome.className = "ai-welcome";
+    welcome.innerHTML = "<strong>What are you working on?</strong><p>Ask for explanations, study guides, outlines, or source-backed research help.</p>";
+    list.appendChild(welcome);
+    return;
+  }
+
+  history.forEach((item) => {
+    const article = document.createElement("article");
+    article.className = `ai-message is-${item.role}`;
+    const label = document.createElement("strong");
+    label.textContent = item.role === "user" ? "You" : "Study AI";
+    const bubble = document.createElement("p");
+    bubble.textContent = item.content;
+    article.append(label, bubble);
+    list.appendChild(article);
+  });
+  list.scrollTop = list.scrollHeight;
+}
+
+function setBusy(value, message) {
+  busy = value;
+  send.disabled = value;
+  input.disabled = value;
+  status.textContent = message || (value
+    ? "Working…"
+    : "Runs on your device with no account or hosted AI quota. Check important facts and sources.");
+}
+
+async function getEngine() {
+  if (engine) return engine;
+  if (!navigator.gpu) {
+    throw new Error("This browser does not support WebGPU. Try current Chrome or Edge with hardware acceleration enabled.");
+  }
+  if (!enginePromise) {
+    enginePromise = CreateMLCEngine(MODEL, {
+      initProgressCallback(report) {
+        const progress = Number.isFinite(report.progress) ? ` ${Math.round(report.progress * 100)}%` : "";
+        setBusy(true, `${report.text || "Preparing the local model"}${progress}`);
+      }
+    }).then((loaded) => {
+      engine = loaded;
+      return loaded;
+    }).catch((error) => {
+      enginePromise = null;
+      throw error;
+    });
+  }
+  return enginePromise;
+}
+
+function cleanText(value, limit = 1400) {
+  return String(value || "").replace(/\s+/g, " ").trim().slice(0, limit);
+}
+
+async function searchWikipedia(query) {
+  const params = new URLSearchParams({
+    action: "query",
+    generator: "search",
+    gsrsearch: query,
+    gsrlimit: "4",
+    prop: "extracts|info",
+    exintro: "1",
+    explaintext: "1",
+    inprop: "url",
+    format: "json",
+    origin: "*"
+  });
+  const response = await fetch(`${WIKIPEDIA_ENDPOINT}?${params}`);
+  if (!response.ok) throw new Error("Search unavailable");
+  const data = await response.json();
+  const pages = Object.values(data.query?.pages || {}).sort((a, b) => (a.index || 0) - (b.index || 0));
+  return pages.map((page) => ({
+    title: cleanText(page.title, 120),
+    url: page.fullurl || `https://en.wikipedia.org/?curid=${page.pageid}`,
+    extract: cleanText(page.extract)
+  })).filter((page) => page.extract);
+}
+
+function sourceContext(sources) {
+  if (!sources.length) return "No live reference snippets were available. Do not invent citations.";
+  return `Wikipedia reference snippets:\n${sources.map((source, index) =>
+    `${index + 1}. ${source.title} — ${source.url}\n${source.extract}`
+  ).join("\n\n")}\n\nUse only these URLs for factual source links. If they do not answer the question, say so.`;
+}
+
+form.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const prompt = input.value.trim();
+  if (!prompt || busy) return;
+
+  history.push({ role: "user", content: prompt });
+  history = history.slice(-MAX_HISTORY);
+  input.value = "";
+  saveHistory();
   render();
+  setBusy(true, engine ? "Searching Wikipedia…" : "Preparing local AI for its first use…");
+
+  try {
+    const [localEngine, sources] = await Promise.all([
+      getEngine(),
+      searchWikipedia(prompt).catch(() => [])
+    ]);
+    setBusy(true, "Writing an answer on your device…");
+    const messages = [{
+      role: "system",
+      content: "You are Study AI, a concise academic tutor. Teach clearly, break down difficult ideas, distinguish evidence from inference, and admit uncertainty. Never invent facts, quotations, or citations. When reference snippets are supplied, cite relevant claims using markdown links and end with a short Sources section. Help the learner understand rather than pretending to have completed experiments or original research."
+    }, {
+      role: "system",
+      content: sourceContext(sources)
+    }, ...history.slice(-10)];
+
+    const response = await localEngine.chat.completions.create({
+      messages,
+      temperature: 0.35,
+      max_tokens: 700
+    });
+    const answer = response.choices?.[0]?.message?.content?.trim() || "I couldn't produce an answer. Try rephrasing the question.";
+    history.push({ role: "assistant", content: answer });
+    history = history.slice(-MAX_HISTORY);
+    saveHistory();
+    render();
+    setBusy(false);
+  } catch (error) {
+    setBusy(false, error?.message || "The local AI could not start on this device.");
+  }
   input.focus();
-})();
+});
+
+input.addEventListener("keydown", (event) => {
+  if (event.key === "Enter" && !event.shiftKey) {
+    event.preventDefault();
+    form.requestSubmit();
+  }
+});
+
+clear.addEventListener("click", () => {
+  history = [];
+  saveHistory();
+  render();
+  status.textContent = "Chat cleared. The local model stays cached on this device.";
+  input.focus();
+});
+
+loadHistory();
+render();
+input.focus();

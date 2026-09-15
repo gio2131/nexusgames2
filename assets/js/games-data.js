@@ -5,6 +5,22 @@
 */
 const GAMES = [
   {
+    id: "clustertruck",
+    title: "Clustertruck",
+    category: "Platformer",
+    url: "games/clustertruck/index.html",
+    thumb: "assets/img/clustertruck.jpg",
+    featured: false
+  },
+  {
+    id: "ages-of-conflict",
+    title: "Ages of Conflict",
+    category: "Strategy",
+    url: "games/ages-of-conflict/index.html",
+    thumb: "assets/img/ages-of-conflict.jpg",
+    featured: false
+  },
+  {
     id: "how-to-fish",
     title: "How to Fish",
     category: "Simulation",

@@ -8,7 +8,7 @@
   <title>AI — Nexus Games</title>
   <link rel="icon" href="assets/img/nexus-logo.png?v=brand-1" type="image/png">
   <script src="assets/js/theme.js?v=theme-3"></script>
-  <link rel="stylesheet" href="assets/css/style.css?v=ai-1">
+  <link rel="stylesheet" href="assets/css/style.css?v=ai-local-1">
 </head>
 <body>
   <aside class="rail" aria-label="Primary navigation">
@@ -25,12 +25,12 @@
   <div class="page-shell">
     <header class="topbar">
       <a class="wordmark" href="index.html"><span><img src="assets/img/nexus-logo.png?v=brand-1" alt=""></span> NEXUS GAMES</a>
-      <p><i></i> Search enabled</p>
+      <p><i></i> Local AI</p>
     </header>
 
     <main class="inner-main ai-main">
       <div class="ai-heading">
-        <div><span class="eyebrow">Private workspace</span><h1>Study AI</h1><p>Your chat history is saved only in this browser.</p></div>
+        <div><span class="eyebrow">Private workspace</span><h1>Study AI</h1><p>No sign-in. Your model and chat run privately in this browser.</p></div>
         <button class="text-button" id="ai-clear" type="button">Clear chat</button>
       </div>
 
@@ -40,13 +40,12 @@
           <textarea id="ai-prompt" maxlength="4000" rows="1" required placeholder="Ask a question…" aria-label="Message Study AI"></textarea>
           <button class="button" id="ai-send" type="submit">Send</button>
         </form>
-        <p class="ai-note" id="ai-status">Uses a lightweight model with web search. AI can make mistakes—check important sources.</p>
+        <p class="ai-note" id="ai-status">First use downloads about 900 MB. Requires a WebGPU browser. Wikipedia search is used when available.</p>
       </section>
     </main>
   </div>
 
-  <script src="https://js.puter.com/v2/"></script>
   <script src="assets/js/site.js?v=chat-panel-2"></script>
-  <script src="assets/js/ai.js?v=ai-1"></script>
+  <script type="module" src="assets/js/ai.js?v=ai-local-1"></script>
 </body>
 </html>
