@@ -85,6 +85,86 @@
     closeButton.focus();
   }
 
+  function initializeChatUnread(chatLinks, drawer) {
+    var broker = "https://ntfy.sh/nexusgames2-chat-9edc4a71f86b42e1-";
+    var lastRoom = "";
+    var unread = false;
+    var polling = false;
+
+    function roomKey() {
+      return new Date().toISOString().slice(0, 13).replace(/[-T]/g, "");
+    }
+
+    function readKey() {
+      return "nexus:chat:lastRead:v1:" + roomKey();
+    }
+
+    function isReading() {
+      return drawer.classList.contains("is-open") ||
+        (location.pathname.split("/").pop() === "chat.html" &&
+          !document.getElementById("chat-room")?.hidden);
+    }
+
+    function display(value) {
+      unread = value;
+      chatLinks.forEach(function (link) {
+        link.classList.toggle("has-unread", value);
+        if (value) link.setAttribute("aria-label", "Chat, unread messages");
+        else link.setAttribute("aria-label", "Chat");
+      });
+    }
+
+    function markRead() {
+      try { localStorage.setItem(readKey(), String(Date.now())); } catch (error) {}
+      display(false);
+    }
+
+    function poll() {
+      var room = roomKey();
+      if (room !== lastRoom) {
+        lastRoom = room;
+        display(false);
+      }
+      if (isReading()) markRead();
+      if (polling) return;
+      polling = true;
+      fetch(broker + room + "/json?poll=1&since=1h", { cache: "no-store" })
+        .then(function (response) {
+          if (!response.ok) throw new Error("Chat check failed");
+          return response.text();
+        })
+        .then(function (text) {
+          if (room !== roomKey()) return;
+          if (isReading()) { markRead(); return; }
+          var lastRead = 0;
+          try { lastRead = Number(localStorage.getItem(readKey())) || 0; } catch (error) {}
+          var hasNew = text.trim().split("\n").some(function (line) {
+            try {
+              var outer = JSON.parse(line);
+              if (outer.event !== "message") return false;
+              var message = JSON.parse(outer.message);
+              return message.app === "nexusgames2-chat" && message.type === "message" &&
+                message.room === room && Number(message.sentAt) > lastRead;
+            } catch (error) { return false; }
+          });
+          display(hasNew);
+        })
+        .catch(function () {})
+        .finally(function () { polling = false; });
+    }
+
+    window.addEventListener("storage", function (event) {
+      if (event.key === readKey()) poll();
+    });
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) poll();
+    });
+    window.addEventListener("focus", poll);
+    poll();
+    setInterval(poll, 5000);
+    return markRead;
+  }
+
   function initializeChrome() {
     var current = location.pathname.split("/").pop() || "index.html";
     document.querySelectorAll("[data-page]").forEach(function (link) {
@@ -106,6 +186,12 @@
     document.body.appendChild(drawer);
 
     var frame = drawer.querySelector("iframe");
+    var markChatRead = initializeChatUnread(chatLinks, drawer);
+    window.Site.markChatRead = markChatRead;
+    window.addEventListener("message", function (event) {
+      if (event.origin === location.origin && event.source === frame.contentWindow &&
+          event.data && event.data.type === "nexus-chat-read") markChatRead();
+    });
 
     function openChat(event) {
       if (event) event.preventDefault();
@@ -115,6 +201,7 @@
       }
       frame.src = "chat.html?panel=1&opened=" + Date.now();
       drawer.classList.add("is-open");
+      markChatRead();
       drawer.setAttribute("aria-hidden", "false");
       chatLinks.forEach(function (link) { link.setAttribute("aria-expanded", "true"); });
     }

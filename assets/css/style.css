@@ -129,6 +129,19 @@ svg { display: block; }
 }
 .rail-nav a:hover span { opacity: 1; transform: none; }
 
+.rail-nav a.has-unread::after {
+  content: "";
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid #101013;
+  border-radius: 50%;
+  background: #ff454f;
+  box-sizing: content-box;
+}
+
 .rail-status {
   display: inline-flex;
   align-items: center;

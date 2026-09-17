@@ -71,6 +71,10 @@
     seen[payload.id] = true;
     messages.push({ id: payload.id, username: author, text: text, sentAt: Number(payload.sentAt) || Date.now() });
     render();
+    if (!room.hidden && window.Site && window.Site.markChatRead) window.Site.markChatRead();
+    if (!room.hidden && window.parent !== window) {
+      try { window.parent.postMessage({ type: "nexus-chat-read" }, location.origin); } catch (error) {}
+    }
   }
 
   function readStream(text) {
@@ -144,6 +148,7 @@
     username = value;
     gate.hidden = true;
     room.hidden = false;
+    if (window.Site && window.Site.markChatRead) window.Site.markChatRead();
     input.focus();
     startRoom();
     roomTimer = setInterval(function () {
