@@ -86,17 +86,20 @@
   }
 
   function initializeChatUnread(chatLinks, drawer) {
-    var broker = "https://ntfy.sh/nexusgames2-chat-9edc4a71f86b42e1-";
-    var lastRoom = "";
-    var unread = false;
-    var polling = false;
+    var topicPrefix = "nexusgames2-chat-9edc4a71f86b42e1-";
+    var currentRoom = "";
+    var socket;
+    var reconnectTimer;
+    var lastEventId = "";
+    var knownIds = Object.create(null);
+    var retryDelay = 3000;
 
     function roomKey() {
       return new Date().toISOString().slice(0, 13).replace(/[-T]/g, "");
     }
 
     function readKey() {
-      return "nexus:chat:lastRead:v1:" + roomKey();
+      return "nexus:chat:readIds:v2:" + currentRoom;
     }
 
     function isReading() {
@@ -106,7 +109,6 @@
     }
 
     function display(value) {
-      unread = value;
       chatLinks.forEach(function (link) {
         link.classList.toggle("has-unread", value);
         if (value) link.setAttribute("aria-label", "Chat, unread messages");
@@ -114,54 +116,103 @@
       });
     }
 
-    function markRead() {
-      try { localStorage.setItem(readKey(), String(Date.now())); } catch (error) {}
+    function readIds() {
+      try {
+        var saved = JSON.parse(localStorage.getItem(readKey()) || "[]");
+        return Array.isArray(saved) ? saved : [];
+      } catch (error) { return []; }
+    }
+
+    function markRead(id) {
+      var ids = readIds();
+      Object.keys(knownIds).forEach(function (knownId) {
+        if (ids.indexOf(knownId) === -1) ids.push(knownId);
+      });
+      if (id && ids.indexOf(id) === -1) ids.push(id);
+      try { localStorage.setItem(readKey(), JSON.stringify(ids.slice(-300))); } catch (error) {}
       display(false);
     }
 
-    function poll() {
-      var room = roomKey();
-      if (room !== lastRoom) {
-        lastRoom = room;
-        display(false);
-      }
-      if (isReading()) markRead();
-      if (polling) return;
-      polling = true;
-      fetch(broker + room + "/json?poll=1&since=1h", { cache: "no-store" })
+    function refreshUnread() {
+      if (isReading()) { markRead(); return; }
+      var read = readIds();
+      display(Object.keys(knownIds).some(function (id) { return read.indexOf(id) === -1; }));
+    }
+
+    function absorb(outer) {
+      if (!outer || outer.event !== "message") return;
+      try {
+        var message = JSON.parse(outer.message);
+        if (message.app !== "nexusgames2-chat" || message.type !== "message" ||
+            message.room !== currentRoom || !message.id) return;
+        knownIds[message.id] = true;
+        if (outer.id) lastEventId = outer.id;
+        refreshUnread();
+      } catch (error) {}
+    }
+
+    function pollFallback() {
+      if (socket && socket.readyState === WebSocket.OPEN) return;
+      var room = currentRoom;
+      var since = lastEventId || "1h";
+      fetch("https://ntfy.sh/" + topicPrefix + room + "/json?poll=1&since=" + encodeURIComponent(since), { cache: "no-store" })
         .then(function (response) {
-          if (!response.ok) throw new Error("Chat check failed");
+          if (!response.ok) throw new Error("Chat check failed: " + response.status);
           return response.text();
         })
         .then(function (text) {
-          if (room !== roomKey()) return;
-          if (isReading()) { markRead(); return; }
-          var lastRead = 0;
-          try { lastRead = Number(localStorage.getItem(readKey())) || 0; } catch (error) {}
-          var hasNew = text.trim().split("\n").some(function (line) {
-            try {
-              var outer = JSON.parse(line);
-              if (outer.event !== "message") return false;
-              var message = JSON.parse(outer.message);
-              return message.app === "nexusgames2-chat" && message.type === "message" &&
-                message.room === room && Number(message.sentAt) > lastRead;
-            } catch (error) { return false; }
+          if (room !== currentRoom) return;
+          text.trim().split("\n").forEach(function (line) {
+            try { absorb(JSON.parse(line)); } catch (error) {}
           });
-          display(hasNew);
         })
-        .catch(function () {})
-        .finally(function () { polling = false; });
+        .catch(function () {});
+    }
+
+    function connect() {
+      clearTimeout(reconnectTimer);
+      if (socket) { try { socket.close(); } catch (error) {} }
+      var room = currentRoom;
+      var since = lastEventId || "1h";
+      try {
+        socket = new WebSocket("wss://ntfy.sh/" + topicPrefix + room + "/ws?since=" + encodeURIComponent(since));
+      } catch (error) {
+        reconnectTimer = setTimeout(connect, retryDelay);
+        return;
+      }
+      socket.addEventListener("open", function () { retryDelay = 3000; });
+      socket.addEventListener("message", function (event) {
+        if (room !== currentRoom) return;
+        try { absorb(JSON.parse(event.data)); } catch (error) {}
+      });
+      socket.addEventListener("close", function () {
+        if (room !== currentRoom) return;
+        reconnectTimer = setTimeout(connect, retryDelay);
+        retryDelay = Math.min(retryDelay * 2, 60000);
+      });
+      socket.addEventListener("error", function () { socket.close(); });
+    }
+
+    function startRoom() {
+      var room = roomKey();
+      if (room === currentRoom) return;
+      currentRoom = room;
+      lastEventId = "";
+      knownIds = Object.create(null);
+      display(false);
+      connect();
     }
 
     window.addEventListener("storage", function (event) {
-      if (event.key === readKey()) poll();
+      if (event.key === readKey()) refreshUnread();
     });
     document.addEventListener("visibilitychange", function () {
-      if (!document.hidden) poll();
+      if (!document.hidden) { startRoom(); refreshUnread(); }
     });
-    window.addEventListener("focus", poll);
-    poll();
-    setInterval(poll, 5000);
+    window.addEventListener("focus", function () { startRoom(); refreshUnread(); });
+    startRoom();
+    setInterval(startRoom, 1000);
+    setInterval(pollFallback, 60000);
     return markRead;
   }
 
@@ -190,7 +241,7 @@
     window.Site.markChatRead = markChatRead;
     window.addEventListener("message", function (event) {
       if (event.origin === location.origin && event.source === frame.contentWindow &&
-          event.data && event.data.type === "nexus-chat-read") markChatRead();
+          event.data && event.data.type === "nexus-chat-read") markChatRead(event.data.id);
     });
 
     function openChat(event) {

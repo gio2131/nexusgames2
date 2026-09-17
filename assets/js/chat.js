@@ -71,9 +71,9 @@
     seen[payload.id] = true;
     messages.push({ id: payload.id, username: author, text: text, sentAt: Number(payload.sentAt) || Date.now() });
     render();
-    if (!room.hidden && window.Site && window.Site.markChatRead) window.Site.markChatRead();
+    if (!room.hidden && window.Site && window.Site.markChatRead) window.Site.markChatRead(payload.id);
     if (!room.hidden && window.parent !== window) {
-      try { window.parent.postMessage({ type: "nexus-chat-read" }, location.origin); } catch (error) {}
+      try { window.parent.postMessage({ type: "nexus-chat-read", id: payload.id }, location.origin); } catch (error) {}
     }
   }
 
@@ -135,7 +135,9 @@
     status.textContent = "Connecting…";
     poll();
     connect();
-    pollTimer = setInterval(poll, 5000);
+    pollTimer = setInterval(function () {
+      if (!socket || socket.readyState !== WebSocket.OPEN) poll();
+    }, 60000);
   }
 
   gateForm.addEventListener("submit", function (event) {
