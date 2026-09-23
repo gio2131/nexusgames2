@@ -5,13 +5,6 @@
 */
 const GAMES = [
   {
-    id: "among-us",
-    title: "Among Us",
-    category: "Multiplayer",
-    url: "games/among-us/index.html",
-    featured: true
-  },
-  {
     id: "clustertruck",
     title: "Clustertruck",
     category: "Platformer",
@@ -260,3 +253,4 @@ const GAMES = [
     featured: true
   }
 ];
+
