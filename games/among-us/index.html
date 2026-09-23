@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,height=device-height,initial-scale=1,user-scalable=no">
+  <title>Among Us Web Beta</title>
+  <style>
+    html,body,#game{width:100%;height:100%;margin:0;overflow:hidden;background:#000}
+    #game{position:fixed;inset:0}
+    #unity-canvas{display:block;width:100%;height:100%;border:0;outline:0;background:#000}
+    #loader{position:fixed;inset:0;z-index:2;display:grid;place-items:center;background:#000;color:#fff;font:16px Arial,sans-serif}
+    #loader-box{width:min(440px,82vw);text-align:center}
+    #bar{height:12px;margin-top:12px;overflow:hidden;border:1px solid #777;border-radius:8px}
+    #fill{width:0;height:100%;background:#35d0ba;transition:width .12s linear}
+    #error{margin-top:12px;color:#ff6961;white-space:pre-wrap}
+  </style>
+</head>
+<body>
+  <div id="game"><canvas id="unity-canvas" tabindex="-1"></canvas></div>
+  <div id="loader"><div id="loader-box"><div id="status">Loading game files…</div><div id="bar"><div id="fill"></div></div><div id="error"></div></div></div>
+  <script>
+    const JSDELIVR = "https://cdn.jsdelivr.net/gh/wasmdotrip/AmongUsWebBeta@main";
+    const GITHUB_RAW = "https://raw.githubusercontent.com/wasmdotrip/AmongUsWebBeta/main";
+    const BUILD = JSDELIVR + "/Build";
+    const STREAMING_ASSETS = GITHUB_RAW + "/StreamingAssets";
+    const LARGE_BUNDLE = "defaultlocalgroup_assets__feb9d729d7679ae240536cf6d5b1e0cc.bundle";
+
+    const canvas = document.getElementById("unity-canvas");
+    const loader = document.getElementById("loader");
+    const statusText = document.getElementById("status");
+    const fill = document.getElementById("fill");
+    const errorText = document.getElementById("error");
+    const browserFetch = window.fetch.bind(window);
+    const BrowserXMLHttpRequest = window.XMLHttpRequest;
+    let assembledBundleUrl = null;
+
+    function updateProgress(percent, message) {
+      fill.style.width = Math.max(0, Math.min(100, percent)) + "%";
+      if (message) statusText.textContent = message;
+    }
+
+    function rawFallbackUrl(url) {
+      return url.startsWith(JSDELIVR) ? GITHUB_RAW + url.slice(JSDELIVR.length) : null;
+    }
+
+    function externalFetch(url, resource, options) {
+      const sourceHeaders = options && options.headers
+        ? options.headers
+        : (typeof Request !== "undefined" && resource instanceof Request ? resource.headers : undefined);
+      const headers = new Headers(sourceHeaders || undefined);
+      headers.delete("Authorization");
+      headers.delete("Proxy-Authorization");
+      headers.delete("Content-Type");
+      const cleanOptions = Object.assign({}, options || {}, {
+        method: (options && options.method) || (typeof Request !== "undefined" && resource instanceof Request ? resource.method : "GET"),
+        headers: headers,
+        credentials: "omit"
+      });
+      return browserFetch(url, cleanOptions);
+    }
+
+    async function fetchWithFallback(resource, options) {
+      const url = typeof resource === "string" ? resource : resource.url;
+      let response;
+      try {
+        response = url.startsWith(JSDELIVR) || url.startsWith(GITHUB_RAW)
+          ? await externalFetch(url, resource, options)
+          : await browserFetch(resource, options);
+      } catch (error) {
+        const fallback = rawFallbackUrl(url);
+        if (!fallback) throw error;
+        return externalFetch(fallback, resource, options);
+      }
+      if (response.ok) return response;
+      const fallback = rawFallbackUrl(url);
+      if (!fallback) return response;
+      console.warn("jsDelivr rejected " + url + "; retrying from GitHub.");
+      return externalFetch(fallback, resource, options);
+    }
+
+    async function combineParts(baseUrl, count, mimeType, numberWidth = 0, onPart) {
+      let finished = 0;
+      const buffers = await Promise.all(Array.from({length:count}, async (_, index) => {
+        const suffix = String(index + 1).padStart(numberWidth, "0");
+        const url = baseUrl + ".part" + suffix;
+        const response = await fetchWithFallback(url);
+        if (!response.ok) throw new Error("Failed to load " + url + " (HTTP " + response.status + ")");
+        const buffer = await response.arrayBuffer();
+        finished++;
+        if (onPart) onPart(finished, count);
+        return buffer;
+      }));
+      return new Blob(buffers, {type:mimeType});
+    }
+
+    window.fetch = function(resource, options) {
+      const url = typeof resource === "string" ? resource : resource.url;
+      const cleanUrl = url.split("?")[0].split("#")[0];
+      if (assembledBundleUrl && cleanUrl.endsWith("/" + LARGE_BUNDLE)) {
+        return browserFetch(assembledBundleUrl, options);
+      }
+      return fetchWithFallback(resource, options);
+    };
+
+    window.XMLHttpRequest = function() {
+      const xhr = new BrowserXMLHttpRequest();
+      const originalOpen = xhr.open;
+      const originalSetRequestHeader = xhr.setRequestHeader;
+      let externalGet = false;
+      xhr.open = function(method, url) {
+        let target = String(url);
+        const cleanUrl = target.split("?")[0].split("#")[0];
+        if (assembledBundleUrl && cleanUrl.endsWith("/" + LARGE_BUNDLE)) {
+          target = assembledBundleUrl;
+        } else if (target.startsWith(JSDELIVR)) {
+          target = GITHUB_RAW + target.slice(JSDELIVR.length);
+        }
+        externalGet = /^(GET|HEAD)$/i.test(method) &&
+          (target.startsWith(JSDELIVR) || target.startsWith(GITHUB_RAW) || target.startsWith("blob:"));
+        const args = Array.prototype.slice.call(arguments);
+        args[1] = target;
+        return originalOpen.apply(xhr, args);
+      };
+      xhr.setRequestHeader = function(name, value) {
+        if (externalGet) {
+          const header = String(name).toLowerCase();
+          if (header !== "accept" && header !== "accept-language" && header !== "range") return;
+        }
+        return originalSetRequestHeader.call(xhr, name, value);
+      };
+      return xhr;
+    };
+    window.XMLHttpRequest.prototype = BrowserXMLHttpRequest.prototype;
+
+    async function loadUnityLoader() {
+      const url = BUILD + "/AmongUsWeb.loader.js";
+      const response = await fetchWithFallback(url);
+      if (!response.ok) throw new Error("Failed to load Unity loader (HTTP " + response.status + ")");
+      const source = await response.text();
+      const script = document.createElement("script");
+      script.src = URL.createObjectURL(new Blob([source], {type:"text/javascript"}));
+      await new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = () => reject(new Error("Unity loader could not be executed."));
+        document.head.appendChild(script);
+      });
+    }
+
+    async function start() {
+      updateProgress(1, "Downloading game files…");
+      const loaderPromise = loadUnityLoader();
+      const dataPromise = combineParts(BUILD + "/AmongUsWeb.data", 6, "application/octet-stream", 0,
+        (done,total) => updateProgress(2 + done / total * 18, "Downloading game data…"));
+      const wasmPromise = combineParts(BUILD + "/AmongUsWeb.wasm", 9, "application/wasm", 0,
+        (done,total) => updateProgress(20 + done / total * 15, "Downloading game code…"));
+      const bundlePromise = combineParts(
+        GITHUB_RAW + "/StreamingAssets/aa/WebGL/" + LARGE_BUNDLE,
+        37,
+        "application/octet-stream",
+        2,
+        (done,total) => updateProgress(35 + done / total * 35, "Downloading game assets…")
+      );
+      const [dataBlob, wasmBlob, bundleBlob] = await Promise.all([dataPromise, wasmPromise, bundlePromise, loaderPromise]);
+      assembledBundleUrl = URL.createObjectURL(bundleBlob);
+
+      const config = {
+        dataUrl:URL.createObjectURL(dataBlob),
+        frameworkUrl:BUILD + "/AmongUsWeb.framework.js",
+        codeUrl:URL.createObjectURL(wasmBlob),
+        streamingAssetsUrl:STREAMING_ASSETS,
+        companyName:"Innersloth",
+        productName:"Among Us",
+        productVersion:"2026.6.5",
+        showBanner:(message,type) => type === "error" ? errorText.textContent = message : console.warn(message)
+      };
+
+      updateProgress(70, "Starting game…");
+      await createUnityInstance(canvas, config, value => updateProgress(70 + value * 30, "Starting game…"));
+      loader.style.display = "none";
+    }
+
+    start().catch(error => {
+      statusText.textContent = "Unable to start the game.";
+      errorText.textContent = error && error.message ? error.message : String(error);
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
