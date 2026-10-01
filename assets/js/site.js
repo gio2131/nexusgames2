@@ -50,7 +50,7 @@
   }
 
   function initializeChangelog() {
-    var key = "nexus:changelog:games-september-2026";
+    var key = "nexus:changelog:migration-september-2026";
     try {
       if (localStorage.getItem(key) === "seen") return;
     } catch (error) {}
@@ -61,8 +61,8 @@
       '<section class="changelog-modal" role="dialog" aria-modal="true" aria-labelledby="changelog-title">' +
       '<span class="eyebrow">Latest update</span>' +
       '<h2 id="changelog-title">Changelogs</h2>' +
-      '<div class="changelog-copy"><p><strong>New games:</strong> How to Fish, Ages of Conflict, Clustertruck</p>' +
-      '<p><strong>Quick Notes:</strong> How to Fish is multiplayer—host a code and have another person join it. Gorilla Tag works the same way.</p></div>' +
+      '<div class="changelog-copy"><p><strong>New games:</strong> Snow Rider 3D, Ragdoll Hit, and the Granny version from Nexus Private Games</p>' +
+      '<p><strong>Quick Notes:</strong> Nexus Private Games has moved here. There is no trusted access or admin jumpscare system. Try the new Proxy tab.</p></div>' +
       '<button class="button changelog-close" type="button">Got it</button>' +
       '</section>';
     document.body.appendChild(overlay);

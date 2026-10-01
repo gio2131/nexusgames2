@@ -4,11 +4,14 @@
   { id: "slug", title: "Title", category: "Genre", url: "games/slug/index.html", thumb: "assets/img/slug.jpg", featured: true }
 */
 const GAMES = [
+  { id: "snow-rider-3d", title: "Snow Rider 3D", category: "Sports", url: "games/snow-rider-3d/index.html", thumb: "assets/img/snow-rider-3d.webp", featured: true },
+  { id: "ragdoll-hit", title: "Ragdoll Hit", category: "Action", url: "games/ragdoll-hit/index.html", thumb: "https://rawcdn.githack.com/genizy/google-class/main/ragdoll-hit/thumbnail.png", featured: true },
   {
     id: "among-us",
     title: "Among Us",
     category: "Multiplayer",
     url: "games/among-us/index.html",
+    thumb: "assets/img/among-us.jpg",
     featured: true
   },
   {

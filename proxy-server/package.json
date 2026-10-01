@@ -1,0 +1,16 @@
+{
+  "name": "nexus-proxy",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "license": "GPL-3.0-or-later",
+  "engines": { "node": ">=22" },
+  "scripts": { "start": "node server.js" },
+  "dependencies": {
+    "@mercuryworkshop/bare-mux": "2.1.9",
+    "@mercuryworkshop/epoxy-transport": "2.1.28",
+    "@mercuryworkshop/wisp-js": "0.4.1",
+    "@titaniumnetwork-dev/ultraviolet": "3.2.10",
+    "express": "^4.21.2"
+  }
+}

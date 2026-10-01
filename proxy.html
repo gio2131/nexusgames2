@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#070707">
   <meta name="description" content="Nexus Games — a curated collection of games that launch instantly.">
-  <title>Nexus Games</title>
+  <title>Proxy — Nexus Games</title>
   <link rel="icon" href="assets/img/nexus-logo.png?v=brand-1" type="image/png">
   <script src="assets/js/theme.js?v=theme-3"></script>
   <link rel="stylesheet" href="assets/css/style.css?v=chat-unread-2">
@@ -43,36 +43,12 @@
       <p><i></i> Catalog ready</p>
     </header>
 
-    <main class="home-main">
-      <section class="continue-section" aria-labelledby="continue-title">
-        <div class="simple-heading">
-          <h1 id="continue-title">Continue playing</h1>
-          <span id="spotlight-count">0 games</span>
-        </div>
-        <div class="feature" id="spotlight">
-        <div class="feature-grid" aria-hidden="true"></div>
-        <div class="feature-copy">
-          <h1 id="feature-title">New worlds<br>loading.</h1>
-          <p>The catalog is cleared and ready for its next lineup.</p>
-          <a class="button" href="games.html">View catalog <span aria-hidden="true">↗</span></a>
-        </div>
-        </div>
-      </section>
-
-      <section class="library-section" aria-labelledby="catalog-title">
-        <div class="section-title">
-          <h2 id="catalog-title">Catalog</h2>
-          <span class="game-count"><b id="total">0</b> games</span>
-        </div>
-        <div id="featured" class="game-grid" aria-live="polite"></div>
-      </section>
+    <main class="proxy-main">
+      <section id="proxy-waiting" class="proxy-waiting" aria-live="polite"><span class="eyebrow">Nexus browser</span><h1>Proxy</h1><p id="proxy-status">The proxy is being connected. Check back soon.</p><button id="proxy-retry" class="button" type="button" hidden>Retry connection</button></section>
+      <iframe id="proxy-frame" title="Nexus proxy browser" allow="fullscreen; clipboard-write" hidden></iframe>
     </main>
-
   </div>
-
-  <script src="assets/js/games-data.js?v=migration-10"></script>
   <script src="assets/js/site.js?v=migration-10"></script>
-  <script src="assets/js/home.js?v=games-4"></script>
-</body>
-</html>
-
+  <script src="assets/js/proxy-config.js?v=1"></script>
+  <script src="assets/js/proxy.js?v=1"></script>
+</body></html>
