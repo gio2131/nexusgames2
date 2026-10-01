@@ -1058,7 +1058,3 @@ html[data-chat-panel="true"] .chat-compose .button { width: 76px; min-width: 0; 
   *, *::before, *::after { transition: none !important; }
   html[data-theme="rgb"] body { animation: none; }
 }
-
-
-/* Proxy browser: plain black canvas, no floating corner decorations. */
-.proxy-main{flex:1;display:flex;min-height:calc(100svh - 100px);position:relative;background:#000;margin:0 calc(-1 * clamp(24px,3vw,56px))}.proxy-waiting{margin:auto;text-align:center;padding:32px;max-width:540px}.proxy-waiting h1{font:700 clamp(38px,6vw,68px)/1 var(--display);margin:20px 0}.proxy-waiting p{color:var(--muted);line-height:1.6}.proxy-main iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}.proxy-waiting .button{margin-top:20px}
